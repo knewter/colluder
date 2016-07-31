@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Html exposing (Html, Attribute, text, div, input, button)
+import Html exposing (Html, Attribute, text, div, input, button, table, tr, td)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onClick)
 import Html.App as Html
@@ -14,7 +14,15 @@ import SoundFont.Subscriptions exposing (..)
 
 main =
     Html.program
-        { init = ( init, Cmd.none ), update = update, view = view, subscriptions = subscriptions }
+        { init = ( init, initCmds ), update = update, view = view, subscriptions = subscriptions }
+
+
+initCmds =
+    Cmd.batch
+        [ initialiseAudioContext ()
+        , requestIsOggEnabled ()
+        , requestLoadFonts "soundfonts"
+        ]
 
 
 type alias Model =
@@ -174,6 +182,26 @@ view model =
         , viewPlayNoteButton model
         , viewPlayNoteSequenceButton model
         , div [] [ viewEnabled model ]
+        , div [] [ viewTrackEditor model ]
+        ]
+
+
+viewTrackEditor : Model -> Html Msg
+viewTrackEditor model =
+    table []
+        [ viewTrackRow model
+        ]
+
+
+viewTrackRow : Model -> Html Msg
+viewTrackRow model =
+    tr []
+        [ td [] [ button [] [ text "1" ] ]
+        , td [] [ button [] [ text "2" ] ]
+        , td [] [ button [] [ text "3" ] ]
+        , td [] [ button [] [ text "4" ] ]
+        , td [] [ button [] [ text "5" ] ]
+        , td [] [ button [] [ text "6" ] ]
         ]
 
 

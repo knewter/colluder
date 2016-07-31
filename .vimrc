@@ -1,1 +1,1 @@
-map ,t :!./build<cr>
+map ,<space> :!./build<cr>
