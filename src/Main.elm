@@ -13,6 +13,7 @@ import SoundFont.Subscriptions exposing (..)
 import Dict exposing (Dict)
 import Time
 import Json.Decode as JD exposing ((:=))
+import MidiTable
 
 
 main =
@@ -369,11 +370,6 @@ onChange tagger =
                      )
 
 
-noteIds : List Int
-noteIds =
-    [0..100]
-
-
 viewTrackMetadata : Int -> Track -> Html Msg
 viewTrackMetadata trackId track =
     let
@@ -382,15 +378,16 @@ viewTrackMetadata trackId track =
             SetNote trackId (MidiNote noteId 0.0 1.0)
     in
         select [ onChange setNote ]
-            (noteIds
+            (MidiTable.notesOctaves
+                |> Dict.toList
                 |> List.map (viewNoteOption trackId track)
             )
 
 
-viewNoteOption : Int -> Track -> Int -> Html Msg
-viewNoteOption trackId track noteId =
+viewNoteOption : Int -> Track -> ( Int, ( String, Int ) ) -> Html Msg
+viewNoteOption trackId track ( noteId, ( note, octave ) ) =
     option [ value <| toString noteId, selected (noteId == track.note.id) ]
-        [ text <| toString noteId ]
+        [ text <| note ++ " (" ++ (toString octave) ++ ")" ]
 
 
 viewLoadFontButton : Model -> Html Msg
