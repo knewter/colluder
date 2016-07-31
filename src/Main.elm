@@ -264,55 +264,6 @@ subscriptions model =
 -- VIEW
 
 
-viewEnabled : Model -> Html Msg
-viewEnabled m =
-    let
-        audio =
-            case (m.audioContext) of
-                Just ac ->
-                    toString ac
-
-                _ ->
-                    "no"
-
-        ogg =
-            if (m.oggEnabled) then
-                "yes"
-            else
-                "no"
-
-        fonts =
-            if (m.fontsLoaded) then
-                "yes"
-            else
-                "no"
-
-        played =
-            if (m.playedNote) then
-                "yes"
-            else
-                "no"
-
-        canPlay =
-            if (m.canPlaySequence) then
-                "yes"
-            else
-                "no"
-    in
-        text
-            ("audio enabled: "
-                ++ audio
-                ++ " ogg enabled: "
-                ++ ogg
-                ++ " fonts loaded: "
-                ++ fonts
-                ++ " played note: "
-                ++ played
-                ++ " can play sequence: "
-                ++ canPlay
-            )
-
-
 view : Model -> Html Msg
 view model =
     div []
@@ -402,44 +353,6 @@ viewLoadFontButton model =
                 [ text "load soundfonts" ]
 
         _ ->
-            div [] []
-
-
-viewPlayNoteButton : Model -> Html Msg
-viewPlayNoteButton model =
-    if (model.fontsLoaded) then
-        button
-            [ onClick (RequestPlayNote (MidiNote 69 0.0 1.0))
-            , id "elm-play-note-button"
-            , btnStyle
-            ]
-            [ text "Play A" ]
-    else
-        div [] []
-
-
-viewPlayNoteSequenceButton : Model -> Html Msg
-viewPlayNoteSequenceButton model =
-    let
-        sequence =
-            [ (MidiNote 60 0.0 1.0)
-            , (MidiNote 62 0.3 1.0)
-            , (MidiNote 64 0.6 1.0)
-            , (MidiNote 65 0.9 1.0)
-            , (MidiNote 67 1.2 1.0)
-            , (MidiNote 69 1.5 1.0)
-            , (MidiNote 71 1.8 1.0)
-            , (MidiNote 72 2.1 1.0)
-            ]
-    in
-        if (model.fontsLoaded) then
-            button
-                [ onClick (RequestPlayNoteSequence sequence)
-                , id "elm-play-note-sequence-button"
-                , btnStyle
-                ]
-                [ text "play sample scale" ]
-        else
             div [] []
 
 
