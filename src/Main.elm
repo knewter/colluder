@@ -50,38 +50,30 @@ type alias Model =
     }
 
 
+totalNotes : Int
+totalNotes =
+    20
+
+
+trackSlots : Dict Int Bool
+trackSlots =
+    [0..(totalNotes - 1)]
+        |> List.foldl (\slotId acc -> Dict.insert slotId False acc) Dict.empty
+
+
+track : Track
+track =
+    { note = (MidiNote 69 0.0 1.0)
+    , slots = trackSlots
+    }
+
+
 init =
     let
         initialSong =
             Dict.empty
-                |> Dict.insert 0 track1
-                |> Dict.insert 1 track2
-
-        track1Slots =
-            Dict.empty
-                |> Dict.insert 0 False
-                |> Dict.insert 1 False
-                |> Dict.insert 2 False
-                |> Dict.insert 3 False
-                |> Dict.insert 4 False
-
-        track1 =
-            { note = (MidiNote 69 0.0 1.0)
-            , slots = track1Slots
-            }
-
-        track2Slots =
-            Dict.empty
-                |> Dict.insert 0 False
-                |> Dict.insert 1 False
-                |> Dict.insert 2 False
-                |> Dict.insert 3 False
-                |> Dict.insert 4 False
-
-        track2 =
-            { note = (MidiNote 50 0.0 1.0)
-            , slots = track2Slots
-            }
+                |> Dict.insert 0 track
+                |> Dict.insert 1 track
     in
         { audioContext = Nothing
         , oggEnabled = False
@@ -90,7 +82,7 @@ init =
         , canPlaySequence = False
         , song = initialSong
         , currentNote = 0
-        , totalNotes = 5
+        , totalNotes = totalNotes
         }
 
 
@@ -339,26 +331,3 @@ viewNoteOption : Int -> Track -> ( Int, ( String, Int ) ) -> Html Msg
 viewNoteOption trackId track ( noteId, ( note, octave ) ) =
     option [ value <| toString noteId, selected (noteId == track.note.id) ]
         [ text <| note ++ " (" ++ (toString octave) ++ ")" ]
-
-
-viewLoadFontButton : Model -> Html Msg
-viewLoadFontButton model =
-    case (model.audioContext) of
-        Just ac ->
-            button
-                [ onClick (RequestLoadFonts "soundfonts")
-                , id "elm-load-font-button"
-                , btnStyle
-                ]
-                [ text "load soundfonts" ]
-
-        _ ->
-            div [] []
-
-
-btnStyle : Attribute msg
-btnStyle =
-    style
-        [ ( "font-size", "1em" )
-        , ( "text-align", "center" )
-        ]
