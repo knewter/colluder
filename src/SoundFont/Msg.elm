@@ -1,6 +1,7 @@
 module SoundFont.Msg exposing (..)
 
 import SoundFont.Types exposing (..)
+import Time
 
 
 type Msg
@@ -14,4 +15,6 @@ type Msg
     | ResponsePlayedNote Bool
     | RequestPlayNoteSequence MidiNotes
     | ResponsePlaySequenceStarted Bool
+    | Tick Time.Time
+    | CheckNote Int Bool
     | NoOp

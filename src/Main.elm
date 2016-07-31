@@ -2,22 +2,23 @@ module Main exposing (..)
 
 import Html exposing (Html, Attribute, text, div, input, button, table, tr, td)
 import Html.Attributes exposing (..)
-import Html.Events exposing (on, onClick)
+import Html.Events exposing (on, onClick, onCheck)
 import Html.App as Html
 import String
 import Task
 import SoundFont.Ports exposing (..)
-import SoundFont.Types exposing (..)
 import SoundFont.Msg exposing (..)
+import SoundFont.Types exposing (..)
 import SoundFont.Subscriptions exposing (..)
 import Dict exposing (Dict)
+import Time
 
 
 main =
-    Html.program { init = ( init, initCmds ), update = update, view = view, subscriptions = subscriptions }
+    Html.program { init = ( init, initCmds init ), update = update, view = view, subscriptions = subscriptions }
 
 
-initCmds =
+initCmds model =
     Cmd.batch
         [ initialiseAudioContext ()
         , requestIsOggEnabled ()
@@ -40,6 +41,8 @@ type alias Model =
     , playedNote : Bool
     , canPlaySequence : Bool
     , song : Song
+    , currentNote : Int
+    , totalNotes : Int
     }
 
 
@@ -50,13 +53,21 @@ init =
 
         track1 =
             Dict.empty
-                |> Dict.insert 1 True
-                |> Dict.insert 2 False
+                |> Dict.insert 0 True
+                |> Dict.insert 1 False
+                |> Dict.insert 2 True
                 |> Dict.insert 3 False
                 |> Dict.insert 4 False
-                |> Dict.insert 5 False
     in
-        Model Nothing False False False False initialSong
+        { audioContext = Nothing
+        , oggEnabled = False
+        , fontsLoaded = False
+        , playedNote = False
+        , canPlaySequence = False
+        , song = initialSong
+        , currentNote = 0
+        , totalNotes = 5
+        }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -112,8 +123,68 @@ update msg model =
             , Cmd.none
             )
 
+        Tick _ ->
+            let
+                newNote =
+                    (model.currentNote + 1) % model.totalNotes
+
+                newModel =
+                    { model | currentNote = newNote }
+            in
+                newModel ! (requestNotes newModel)
+
+        CheckNote id on ->
+            let
+                updateTrack : Track -> Track
+                updateTrack track =
+                    track
+                        |> Dict.update id
+                            (\v ->
+                                case v of
+                                    Just True ->
+                                        Just False
+
+                                    Just False ->
+                                        Just True
+
+                                    Nothing ->
+                                        Nothing
+                            )
+
+                newSong : Song
+                newSong =
+                    model.song
+                        |> List.map updateTrack
+            in
+                { model | song = newSong } ! []
+
         NoOp ->
             ( model, Cmd.none )
+
+
+requestNotes : Model -> List (Cmd Msg)
+requestNotes model =
+    model
+        |> getNotes model.currentNote
+        |> List.map requestPlayNote
+
+
+getNotes : Int -> Model -> List MidiNote
+getNotes currentNote model =
+    model.song
+        |> List.foldl
+            (\track acc ->
+                case Dict.get currentNote track of
+                    Just True ->
+                        (MidiNote 69 0.0 1.0) :: acc
+
+                    Just False ->
+                        acc
+
+                    Nothing ->
+                        acc
+            )
+            []
 
 
 
@@ -128,6 +199,7 @@ subscriptions model =
         , fontsLoadedSub
         , playedNoteSub
         , playSequenceStartedSub
+        , Time.every Time.second Tick
         ]
 
 
@@ -187,7 +259,15 @@ viewEnabled m =
 view : Model -> Html Msg
 view model =
     div []
-        [ viewTrackEditor model ]
+        [ viewMetadata model
+        , viewTrackEditor model
+        ]
+
+
+viewMetadata : Model -> Html Msg
+viewMetadata model =
+    div []
+        [ text <| "Current note: " ++ (toString model.currentNote) ]
 
 
 viewTrackEditor : Model -> Html Msg
@@ -203,7 +283,7 @@ viewTrackEditor model =
 
 viewTrackCell : ( Int, Bool ) -> Html Msg
 viewTrackCell ( id, on ) =
-    td [] [ input [ type' "checkbox", checked on ] [ text <| toString id ] ]
+    td [] [ input [ type' "checkbox", checked on, onCheck (CheckNote id) ] [ text <| toString id ] ]
 
 
 viewTrackRow : Track -> Html Msg
