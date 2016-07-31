@@ -10,11 +10,11 @@ import SoundFont.Ports exposing (..)
 import SoundFont.Types exposing (..)
 import SoundFont.Msg exposing (..)
 import SoundFont.Subscriptions exposing (..)
+import Dict exposing (Dict)
 
 
 main =
-    Html.program
-        { init = ( init, initCmds ), update = update, view = view, subscriptions = subscriptions }
+    Html.program { init = ( init, initCmds ), update = update, view = view, subscriptions = subscriptions }
 
 
 initCmds =
@@ -25,17 +25,38 @@ initCmds =
         ]
 
 
+type alias Song =
+    List Track
+
+
+type alias Track =
+    Dict Int Bool
+
+
 type alias Model =
     { audioContext : Maybe AudioContext
     , oggEnabled : Bool
     , fontsLoaded : Bool
     , playedNote : Bool
     , canPlaySequence : Bool
+    , song : Song
     }
 
 
 init =
-    Model Nothing False False False False
+    let
+        initialSong =
+            [ track1 ]
+
+        track1 =
+            Dict.empty
+                |> Dict.insert 1 True
+                |> Dict.insert 2 False
+                |> Dict.insert 3 False
+                |> Dict.insert 4 False
+                |> Dict.insert 5 False
+    in
+        Model Nothing False False False False initialSong
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -166,43 +187,35 @@ viewEnabled m =
 view : Model -> Html Msg
 view model =
     div []
-        [ button
-            [ onClick InitialiseAudioContext
-            , id "elm-check-audio-context-button"
-            , btnStyle
-            ]
-            [ text "check audio context" ]
-        , button
-            [ onClick RequestOggEnabled
-            , id "elm-check-ogg-enabled-button"
-            , btnStyle
-            ]
-            [ text "check ogg enabled" ]
-        , viewLoadFontButton model
-        , viewPlayNoteButton model
-        , viewPlayNoteSequenceButton model
-        , div [] [ viewEnabled model ]
-        , div [] [ viewTrackEditor model ]
-        ]
+        [ viewTrackEditor model ]
 
 
 viewTrackEditor : Model -> Html Msg
 viewTrackEditor model =
-    table []
-        [ viewTrackRow model
-        ]
+    let
+        trackRows =
+            model.song
+                |> List.map viewTrackRow
+    in
+        table []
+            trackRows
 
 
-viewTrackRow : Model -> Html Msg
-viewTrackRow model =
-    tr []
-        [ td [] [ button [] [ text "1" ] ]
-        , td [] [ button [] [ text "2" ] ]
-        , td [] [ button [] [ text "3" ] ]
-        , td [] [ button [] [ text "4" ] ]
-        , td [] [ button [] [ text "5" ] ]
-        , td [] [ button [] [ text "6" ] ]
-        ]
+viewTrackCell : ( Int, Bool ) -> Html Msg
+viewTrackCell ( id, on ) =
+    td [] [ input [ type' "checkbox", checked on ] [ text <| toString id ] ]
+
+
+viewTrackRow : Track -> Html Msg
+viewTrackRow track =
+    let
+        trackCells =
+            track
+                |> Dict.toList
+                |> List.map viewTrackCell
+    in
+        tr []
+            trackCells
 
 
 viewLoadFontButton : Model -> Html Msg
