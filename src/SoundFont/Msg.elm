@@ -17,4 +17,5 @@ type Msg
     | ResponsePlaySequenceStarted Bool
     | Tick Time.Time
     | CheckNote Int Int Bool
+    | SetNote Int MidiNote
     | NoOp

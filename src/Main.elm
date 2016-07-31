@@ -1,8 +1,8 @@
 module Main exposing (..)
 
-import Html exposing (Html, Attribute, text, div, input, button, table, tr, td)
+import Html exposing (Html, Attribute, text, div, input, button, table, tr, td, select, option)
 import Html.Attributes exposing (..)
-import Html.Events exposing (on, onClick, onCheck)
+import Html.Events exposing (on, onClick, onCheck, targetValue)
 import Html.App as Html
 import String
 import Task
@@ -12,6 +12,7 @@ import SoundFont.Types exposing (..)
 import SoundFont.Subscriptions exposing (..)
 import Dict exposing (Dict)
 import Time
+import Json.Decode as JD exposing ((:=))
 
 
 main =
@@ -189,6 +190,30 @@ update msg model =
             in
                 { model | song = newSong } ! []
 
+        SetNote trackId midiNote ->
+            let
+                _ =
+                    Debug.log "trackId: " (toString trackId)
+
+                _ =
+                    Debug.log "note: " (toString midiNote)
+
+                updateTrack : Maybe Track -> Maybe Track
+                updateTrack maybeTrack =
+                    case maybeTrack of
+                        Just track ->
+                            Just { track | note = midiNote }
+
+                        Nothing ->
+                            Nothing
+
+                newSong : Song
+                newSong =
+                    model.song
+                        |> Dict.update trackId updateTrack
+            in
+                { model | song = newSong } ! []
+
         NoOp ->
             ( model, Cmd.none )
 
@@ -291,7 +316,7 @@ view : Model -> Html Msg
 view model =
     div []
         [ viewMetadata model
-        , viewTrackEditor model
+        , viewSongEditor model
         ]
 
 
@@ -301,12 +326,12 @@ viewMetadata model =
         [ text <| "Current note: " ++ (toString model.currentNote) ]
 
 
-viewTrackEditor : Model -> Html Msg
-viewTrackEditor model =
+viewSongEditor : Model -> Html Msg
+viewSongEditor model =
     let
         trackRows =
             model.song
-                |> Dict.foldl (\trackId track acc -> acc ++ [ (viewTrackRow trackId track) ]) []
+                |> Dict.foldl (\trackId track acc -> acc ++ [ (viewTrack trackId track) ]) []
     in
         table []
             trackRows
@@ -317,8 +342,8 @@ viewTrackCell trackId ( slotId, on ) =
     td [] [ input [ type' "checkbox", checked on, onCheck (CheckNote trackId slotId) ] [ text <| toString slotId ] ]
 
 
-viewTrackRow : Int -> Track -> Html Msg
-viewTrackRow trackId track =
+viewTrack : Int -> Track -> Html Msg
+viewTrack trackId track =
     let
         trackCells =
             track.slots
@@ -326,9 +351,46 @@ viewTrackRow trackId track =
                 |> List.map (viewTrackCell trackId)
     in
         tr []
-            ([ td [] [ text (toString track.note) ] ]
+            ([ td [] [ viewTrackMetadata trackId track ] ]
                 ++ trackCells
             )
+
+
+onChange : (Int -> Msg) -> Html.Attribute Msg
+onChange tagger =
+    on "change"
+        <| (JD.at [ "target", "selectedIndex" ] JD.int)
+        `JD.andThen` (\id ->
+                        let
+                            _ =
+                                Debug.log "note id: " id
+                        in
+                            JD.succeed <| tagger id
+                     )
+
+
+noteIds : List Int
+noteIds =
+    [0..100]
+
+
+viewTrackMetadata : Int -> Track -> Html Msg
+viewTrackMetadata trackId track =
+    let
+        setNote : Int -> Msg
+        setNote noteId =
+            SetNote trackId (MidiNote noteId 0.0 1.0)
+    in
+        select [ onChange setNote ]
+            (noteIds
+                |> List.map (viewNoteOption trackId track)
+            )
+
+
+viewNoteOption : Int -> Track -> Int -> Html Msg
+viewNoteOption trackId track noteId =
+    option [ value <| toString noteId, selected (noteId == track.note.id) ]
+        [ text <| toString noteId ]
 
 
 viewLoadFontButton : Model -> Html Msg
