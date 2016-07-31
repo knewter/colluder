@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Colluder</title>
+  </head>
+  <body>
+    <div id="elmSoundFont"></div>
+    <script src="../js/soundfont-player.js"></script>
+    <script src="target/elm.js"></script>
+    <script>
+    var node = document.getElementById('elmSoundFont');
+    var myapp = Elm.Main.embed(node);
+    <!-- the javascript below is written to accept an initial parameter named node-->
+    </script>
+    <script src="../js/nativeSoundFont.js"></script>
+  </body>
+</html>

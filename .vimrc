@@ -1,0 +1,1 @@
+map ,t :!./build<cr>
