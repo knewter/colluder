@@ -27,11 +27,13 @@ initCmds model =
 
 
 type alias Song =
-    List Track
+    Dict Int Track
 
 
 type alias Track =
-    Dict Int Bool
+    { note : MidiNote
+    , slots : Dict Int Bool
+    }
 
 
 type alias Model =
@@ -49,15 +51,35 @@ type alias Model =
 init =
     let
         initialSong =
-            [ track1 ]
-
-        track1 =
             Dict.empty
-                |> Dict.insert 0 True
+                |> Dict.insert 0 track1
+                |> Dict.insert 1 track2
+
+        track1Slots =
+            Dict.empty
+                |> Dict.insert 0 False
                 |> Dict.insert 1 False
-                |> Dict.insert 2 True
+                |> Dict.insert 2 False
                 |> Dict.insert 3 False
                 |> Dict.insert 4 False
+
+        track1 =
+            { note = (MidiNote 69 0.0 1.0)
+            , slots = track1Slots
+            }
+
+        track2Slots =
+            Dict.empty
+                |> Dict.insert 0 False
+                |> Dict.insert 1 False
+                |> Dict.insert 2 False
+                |> Dict.insert 3 False
+                |> Dict.insert 4 False
+
+        track2 =
+            { note = (MidiNote 50 0.0 1.0)
+            , slots = track2Slots
+            }
     in
         { audioContext = Nothing
         , oggEnabled = False
@@ -133,28 +155,37 @@ update msg model =
             in
                 newModel ! (requestNotes newModel)
 
-        CheckNote id on ->
+        CheckNote trackId slotId on ->
             let
-                updateTrack : Track -> Track
-                updateTrack track =
-                    track
-                        |> Dict.update id
-                            (\v ->
-                                case v of
-                                    Just True ->
-                                        Just False
+                updateTrack : Maybe Track -> Maybe Track
+                updateTrack maybeTrack =
+                    let
+                        newSlots track' =
+                            track'.slots
+                                |> Dict.update slotId
+                                    (\v ->
+                                        case v of
+                                            Just True ->
+                                                Just False
 
-                                    Just False ->
-                                        Just True
+                                            Just False ->
+                                                Just True
 
-                                    Nothing ->
-                                        Nothing
-                            )
+                                            Nothing ->
+                                                Nothing
+                                    )
+                    in
+                        case maybeTrack of
+                            Just track ->
+                                Just { track | slots = (newSlots track) }
+
+                            Nothing ->
+                                Nothing
 
                 newSong : Song
                 newSong =
                     model.song
-                        |> List.map updateTrack
+                        |> Dict.update trackId updateTrack
             in
                 { model | song = newSong } ! []
 
@@ -172,11 +203,11 @@ requestNotes model =
 getNotes : Int -> Model -> List MidiNote
 getNotes currentNote model =
     model.song
-        |> List.foldl
-            (\track acc ->
-                case Dict.get currentNote track of
+        |> Dict.foldl
+            (\_ track acc ->
+                case Dict.get currentNote track.slots of
                     Just True ->
-                        (MidiNote 69 0.0 1.0) :: acc
+                        track.note :: acc
 
                     Just False ->
                         acc
@@ -275,27 +306,29 @@ viewTrackEditor model =
     let
         trackRows =
             model.song
-                |> List.map viewTrackRow
+                |> Dict.foldl (\trackId track acc -> acc ++ [ (viewTrackRow trackId track) ]) []
     in
         table []
             trackRows
 
 
-viewTrackCell : ( Int, Bool ) -> Html Msg
-viewTrackCell ( id, on ) =
-    td [] [ input [ type' "checkbox", checked on, onCheck (CheckNote id) ] [ text <| toString id ] ]
+viewTrackCell : Int -> ( Int, Bool ) -> Html Msg
+viewTrackCell trackId ( slotId, on ) =
+    td [] [ input [ type' "checkbox", checked on, onCheck (CheckNote trackId slotId) ] [ text <| toString slotId ] ]
 
 
-viewTrackRow : Track -> Html Msg
-viewTrackRow track =
+viewTrackRow : Int -> Track -> Html Msg
+viewTrackRow trackId track =
     let
         trackCells =
-            track
+            track.slots
                 |> Dict.toList
-                |> List.map viewTrackCell
+                |> List.map (viewTrackCell trackId)
     in
         tr []
-            trackCells
+            ([ td [] [ text (toString track.note) ] ]
+                ++ trackCells
+            )
 
 
 viewLoadFontButton : Model -> Html Msg

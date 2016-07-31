@@ -16,5 +16,5 @@ type Msg
     | RequestPlayNoteSequence MidiNotes
     | ResponsePlaySequenceStarted Bool
     | Tick Time.Time
-    | CheckNote Int Bool
+    | CheckNote Int Int Bool
     | NoOp
