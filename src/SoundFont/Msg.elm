@@ -18,4 +18,5 @@ type Msg
     | Tick Time.Time
     | CheckNote Int Int Bool
     | SetNote Int MidiNote
+    | AddTrack
     | NoOp

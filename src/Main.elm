@@ -207,6 +207,17 @@ update msg model =
             in
                 { model | song = newSong } ! []
 
+        AddTrack ->
+            let
+                newTrackId =
+                    Dict.size model.song
+
+                newSong =
+                    model.song
+                        |> Dict.insert newTrackId track
+            in
+                { model | song = newSong } ! []
+
         NoOp ->
             ( model, Cmd.none )
 
@@ -277,8 +288,10 @@ viewSongEditor model =
             model.song
                 |> Dict.foldl (\trackId track acc -> acc ++ [ (viewTrack trackId track) ]) []
     in
-        table []
-            trackRows
+        div []
+            [ table [] trackRows
+            , button [ onClick AddTrack ] [ text "Add Track" ]
+            ]
 
 
 viewTrackCell : Int -> ( Int, Bool ) -> Html Msg
