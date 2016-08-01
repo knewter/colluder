@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Html exposing (Html, Attribute, text, div, input, button, table, tr, td, select, option)
+import Html exposing (Html, Attribute, text, div, input, button, table, tr, td, select, option, node)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onClick, onCheck, targetValue)
 import Html.App as Html
@@ -14,6 +14,7 @@ import Dict exposing (Dict)
 import Time
 import Json.Decode as JD exposing ((:=))
 import MidiTable
+import Styles
 
 
 main =
@@ -284,16 +285,24 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ viewMetadata model
-        , viewTopControls model
-        , viewSongEditor model
-        ]
+    let
+        compiled =
+            Styles.compile Styles.css
+    in
+        div []
+            [ node "style" [ type' "text/css" ] [ text compiled.css ]
+            , viewMetadata model
+            , viewTopControls model
+            , viewSongEditor model
+            ]
 
 
 viewTopControls : Model -> Html Msg
 viewTopControls model =
     let
+        { id } =
+            Styles.mainNamespace
+
         pauseText =
             case model.paused of
                 True ->
@@ -302,7 +311,7 @@ viewTopControls model =
                 False ->
                     "pause"
     in
-        div []
+        div [ id Styles.TopControls ]
             [ button [ onClick TogglePaused ] [ text pauseText ]
             ]
 

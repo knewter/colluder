@@ -10,7 +10,9 @@
     "dependencies": {
         "elm-lang/core": "4.0.3 <= v < 5.0.0",
         "elm-lang/html": "1.1.0 <= v < 2.0.0",
-        "newlandsvalley/elm-comidi": "2.1.0 <= v < 3.0.0"
+        "newlandsvalley/elm-comidi": "2.1.0 <= v < 3.0.0",
+        "rtfeldman/elm-css": "4.0.2 <= v < 5.0.0",
+        "rtfeldman/elm-css-helpers": "2.0.0 <= v < 3.0.0"
     },
     "elm-version": "0.17.1 <= v < 0.18.0"
 }
