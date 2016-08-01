@@ -329,28 +329,46 @@ viewSongEditor model =
     let
         trackRows =
             model.song
-                |> Dict.foldl (\trackId track acc -> acc ++ [ (viewTrack trackId track) ]) []
+                |> Dict.foldl (\trackId track acc -> acc ++ [ (viewTrack model.currentNote trackId track) ]) []
+
+        { class } =
+            Styles.mainNamespace
     in
-        div []
+        div [ class [ Styles.Song ] ]
             [ table [] trackRows
             , button [ onClick AddTrack ] [ text "Add Track" ]
             ]
 
 
-viewTrackCell : Int -> ( Int, Bool ) -> Html Msg
-viewTrackCell trackId ( slotId, on ) =
-    td [] [ input [ type' "checkbox", checked on, onCheck (CheckNote trackId slotId) ] [ text <| toString slotId ] ]
+viewTrackCell : Int -> Int -> ( Int, Bool ) -> Html Msg
+viewTrackCell currentNote trackId ( slotId, on ) =
+    let
+        { classList } =
+            Styles.mainNamespace
+
+        isCurrentNote =
+            slotId == currentNote
+    in
+        td
+            [ classList [ ( Styles.CurrentNote, isCurrentNote ), ( Styles.Checked, on ) ] ]
+            [ input
+                [ type' "checkbox", checked on, onCheck (CheckNote trackId slotId) ]
+                [ text <| toString slotId ]
+            ]
 
 
-viewTrack : Int -> Track -> Html Msg
-viewTrack trackId track =
+viewTrack : Int -> Int -> Track -> Html Msg
+viewTrack currentNote trackId track =
     let
         trackCells =
             track.slots
                 |> Dict.toList
-                |> List.map (viewTrackCell trackId)
+                |> List.map (viewTrackCell currentNote trackId)
+
+        { class } =
+            Styles.mainNamespace
     in
-        tr []
+        tr [ class [ Styles.Track ] ]
             ([ td [] [ viewTrackMetadata trackId track ] ]
                 ++ trackCells
             )
@@ -358,15 +376,16 @@ viewTrack trackId track =
 
 onChange : (Int -> Msg) -> Html.Attribute Msg
 onChange tagger =
-    on "change"
-        <| (JD.at [ "target", "selectedIndex" ] JD.int)
-        `JD.andThen` (\id ->
-                        let
-                            _ =
-                                Debug.log "note id: " id
-                        in
-                            JD.succeed <| tagger id
-                     )
+    on "change" <|
+        (JD.at [ "target", "selectedIndex" ] JD.int)
+            `JD.andThen`
+                (\id ->
+                    let
+                        _ =
+                            Debug.log "note id: " id
+                    in
+                        JD.succeed <| tagger id
+                )
 
 
 viewTrackMetadata : Int -> Track -> Html Msg
