@@ -19,4 +19,5 @@ type Msg
     | CheckNote Int Int Bool
     | SetNote Int MidiNote
     | AddTrack
+    | TogglePaused
     | NoOp

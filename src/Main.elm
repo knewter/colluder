@@ -47,6 +47,7 @@ type alias Model =
     , song : Song
     , currentNote : Int
     , totalNotes : Int
+    , paused : Bool
     }
 
 
@@ -83,6 +84,7 @@ init =
         , song = initialSong
         , currentNote = 0
         , totalNotes = totalNotes
+        , paused = False
         }
 
 
@@ -138,6 +140,9 @@ update msg model =
             ( { model | canPlaySequence = playing }
             , Cmd.none
             )
+
+        TogglePaused ->
+            { model | paused = not model.paused } ! []
 
         Tick _ ->
             let
@@ -253,14 +258,24 @@ getNotes currentNote model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch
-        [ audioContextSub
-        , oggEnabledSub
-        , fontsLoadedSub
-        , playedNoteSub
-        , playSequenceStartedSub
-        , Time.every Time.second Tick
-        ]
+    let
+        tickSub =
+            case model.paused of
+                True ->
+                    []
+
+                False ->
+                    [ Time.every Time.second Tick ]
+    in
+        Sub.batch
+            ([ audioContextSub
+             , oggEnabledSub
+             , fontsLoadedSub
+             , playedNoteSub
+             , playSequenceStartedSub
+             ]
+                ++ tickSub
+            )
 
 
 
@@ -271,14 +286,33 @@ view : Model -> Html Msg
 view model =
     div []
         [ viewMetadata model
+        , viewTopControls model
         , viewSongEditor model
         ]
+
+
+viewTopControls : Model -> Html Msg
+viewTopControls model =
+    let
+        pauseText =
+            case model.paused of
+                True ->
+                    "unpause"
+
+                False ->
+                    "pause"
+    in
+        div []
+            [ button [ onClick TogglePaused ] [ text pauseText ]
+            ]
 
 
 viewMetadata : Model -> Html Msg
 viewMetadata model =
     div []
-        [ text <| "Current note: " ++ (toString model.currentNote) ]
+        [ div [] [ text <| "Current note: " ++ (toString model.currentNote) ]
+        , div [] [ text <| "Paused: " ++ (toString model.paused) ]
+        ]
 
 
 viewSongEditor : Model -> Html Msg
