@@ -20,4 +20,5 @@ type Msg
     | SetNote Int MidiNote
     | AddTrack
     | TogglePaused
+    | SetBPM Int
     | NoOp

@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Html exposing (Html, Attribute, text, div, input, button, table, tr, td, select, option, node)
 import Html.Attributes exposing (..)
-import Html.Events exposing (on, onClick, onCheck, targetValue)
+import Html.Events exposing (on, onClick, onCheck, onInput, targetValue)
 import Html.App as Html
 import String
 import Task
@@ -49,6 +49,7 @@ type alias Model =
     , currentNote : Int
     , totalNotes : Int
     , paused : Bool
+    , bpm : Int
     }
 
 
@@ -86,6 +87,7 @@ init =
         , currentNote = 0
         , totalNotes = totalNotes
         , paused = False
+        , bpm = 128
         }
 
 
@@ -144,6 +146,9 @@ update msg model =
 
         TogglePaused ->
             { model | paused = not model.paused } ! []
+
+        SetBPM bpm ->
+            { model | bpm = bpm } ! []
 
         Tick _ ->
             let
@@ -266,7 +271,11 @@ subscriptions model =
                     []
 
                 False ->
-                    [ Time.every Time.second Tick ]
+                    let
+                        interval =
+                            1 / (toFloat model.bpm)
+                    in
+                        [ Time.every (Time.minute * interval) Tick ]
     in
         Sub.batch
             ([ audioContextSub
@@ -313,6 +322,13 @@ viewTopControls model =
     in
         div [ id Styles.TopControls ]
             [ button [ onClick TogglePaused ] [ text pauseText ]
+            , input
+                  [ onInput (SetBPM << Result.withDefault 128 << String.toInt)
+                  , placeholder "BPM"
+                  , type' "number"
+                  , value (toString model.bpm)
+                  ]
+                  []
             ]
 
 
