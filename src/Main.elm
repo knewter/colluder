@@ -196,12 +196,6 @@ update msg model =
 
         SetNote trackId midiNote ->
             let
-                _ =
-                    Debug.log "trackId: " (toString trackId)
-
-                _ =
-                    Debug.log "note: " (toString midiNote)
-
                 updateTrack : Maybe Track -> Maybe Track
                 updateTrack maybeTrack =
                     case maybeTrack of
@@ -323,12 +317,12 @@ viewTopControls model =
         div [ id Styles.TopControls ]
             [ button [ onClick TogglePaused ] [ text pauseText ]
             , input
-                  [ onInput (SetBPM << Result.withDefault 128 << String.toInt)
-                  , placeholder "BPM"
-                  , type' "number"
-                  , value (toString model.bpm)
-                  ]
-                  []
+                [ onInput (SetBPM << Result.withDefault 128 << String.toInt)
+                , placeholder "BPM"
+                , type' "number"
+                , value (toString model.bpm)
+                ]
+                []
             ]
 
 
@@ -394,14 +388,7 @@ onChange : (Int -> Msg) -> Html.Attribute Msg
 onChange tagger =
     on "change" <|
         (JD.at [ "target", "selectedIndex" ] JD.int)
-            `JD.andThen`
-                (\id ->
-                    let
-                        _ =
-                            Debug.log "note id: " id
-                    in
-                        JD.succeed <| tagger id
-                )
+            `JD.andThen` (JD.succeed << tagger)
 
 
 viewTrackMetadata : Int -> Track -> Html Msg
