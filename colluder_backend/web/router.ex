@@ -18,9 +18,4 @@ defmodule ColluderBackend.Router do
 
     get "/", PageController, :index
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", ColluderBackend do
-  #   pipe_through :api
-  # end
 end

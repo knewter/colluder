@@ -3,12 +3,18 @@ defmodule ColluderBackend.CollusionChannelTest do
   import TestHelper
 
   alias ColluderBackend.CollusionChannel
+  alias ColluderBackend.Collusion.Song
 
   describe "interacting with a collusion" do
     setup [:start_collusion]
 
     test "starts the collusion on join", %{id: id} do
       assert is_pid(:global.whereis_name(id))
+    end
+
+    test "sends the collusion's state to the client on join", %{id: id} do
+      expected_song = Song.init(id)
+      assert_push "collusion:state", ^expected_song
     end
 
     test "adding a track works", %{socket: socket, pid: pid} do

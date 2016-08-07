@@ -10,6 +10,7 @@ defmodule ColluderBackend.Mixfile do
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      aliases: aliases(),
+     dialyzer: [plt_add_deps: :transitive],
      deps: deps()]
   end
 
@@ -39,7 +40,8 @@ defmodule ColluderBackend.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
-      {:uuid, "~> 1.1"}
+      {:uuid, "~> 1.1"},
+      {:dialyxir, "~> 0.3.5", only: [:dev]}
     ]
   end
 

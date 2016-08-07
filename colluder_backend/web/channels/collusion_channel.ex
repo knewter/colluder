@@ -3,6 +3,7 @@ defmodule ColluderBackend.CollusionChannel do
 
   def join("collusion:"<>id, _payload, socket) do
     {:ok, pid} = CollusionSupervisor.start_collusion(id)
+    send(self, :after_join)
     {
       :ok,
       socket
@@ -14,5 +15,11 @@ defmodule ColluderBackend.CollusionChannel do
   def handle_in("track:add", _, socket) do
     :ok = socket.assigns[:pid] |> CollusionServer.add_track
     {:reply, :ok, socket}
+  end
+
+  def handle_info(:after_join, socket) do
+    state = socket.assigns[:pid] |> CollusionServer.get_state
+    push socket, "collusion:state", state
+    {:noreply, socket}
   end
 end
