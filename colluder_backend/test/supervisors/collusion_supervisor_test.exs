@@ -5,7 +5,7 @@ defmodule ColluderBackend.CollusionSupervisorTest do
 
   describe "creating new collusions" do
     test "creating a nonexistent collusion" do
-      assert {:ok, pid} = CollusionSupervisor.start_collusion(new_id())
+      assert {:ok, _pid} = CollusionSupervisor.start_collusion(new_id())
     end
 
     test "trying to start a collusion that already exists" do

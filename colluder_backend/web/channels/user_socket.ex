@@ -3,6 +3,7 @@ defmodule ColluderBackend.UserSocket do
 
   ## Channels
   # channel "room:*", ColluderBackend.RoomChannel
+  channel "collusion:*", ColluderBackend.CollusionChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
