@@ -2,8 +2,13 @@ defmodule ColluderBackend.CollusionServer do
   use GenServer
 
   ### Public API
-  def start() do
-    GenServer.start(__MODULE__, [], [])
+  def start_link(id) do
+    case :global.whereis_name(id) do
+      :undefined ->
+        GenServer.start_link(__MODULE__, id, name: {:global, id})
+      pid ->
+        {:ok, pid}
+    end
   end
 
   def tracks(pid) do
@@ -31,8 +36,8 @@ defmodule ColluderBackend.CollusionServer do
   end
 
   ### Server API
-  def init(_) do
-    {:ok, initial_model}
+  def init(id) do
+    {:ok, initial_model(id)}
   end
 
   def handle_call(:tracks, _from, state) do
@@ -65,8 +70,9 @@ defmodule ColluderBackend.CollusionServer do
   end
 
   ### Internal
-  defp initial_model do
+  defp initial_model(id) do
     %{
+      id: id,
       tracks: initial_tracks
     }
   end

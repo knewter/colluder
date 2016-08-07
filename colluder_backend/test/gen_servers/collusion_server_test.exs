@@ -1,10 +1,11 @@
 defmodule Colluder.GenServers.CollusionServerTest do
   use ExUnit.Case, async: true
   alias ColluderBackend.CollusionServer
+  import TestHelper
 
   describe "from the ground up" do
     test "can start server" do
-      assert {:ok, _pid} = CollusionServer.start()
+      assert {:ok, _pid} = CollusionServer.start_link(new_id())
     end
   end
 
@@ -32,8 +33,15 @@ defmodule Colluder.GenServers.CollusionServerTest do
     end
   end
 
+  describe "trying to start an already-registered server" do
+    test "returns existing server as if the start was successful" do
+      {:ok, pid} = CollusionServer.start_link(1)
+      assert {:ok, ^pid} = CollusionServer.start_link(1)
+    end
+  end
+
   defp create_server(context) do
-    {:ok, server} = CollusionServer.start()
+    {:ok, server} = CollusionServer.start_link(new_id())
     {:ok, put_in(context, [:server], server)}
   end
 end
