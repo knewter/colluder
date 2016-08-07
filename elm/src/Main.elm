@@ -47,20 +47,20 @@ type alias Model =
     , canPlaySequence : Bool
     , song : Song
     , currentNote : Int
-    , totalNotes : Int
+    , totalSlots : Int
     , paused : Bool
     , bpm : Int
     }
 
 
-totalNotes : Int
-totalNotes =
+totalSlots : Int
+totalSlots =
     20
 
 
 trackSlots : Dict Int Bool
 trackSlots =
-    [0..(totalNotes - 1)]
+    [0..(totalSlots - 1)]
         |> List.foldl (\slotId acc -> Dict.insert slotId False acc) Dict.empty
 
 
@@ -85,7 +85,7 @@ init =
         , canPlaySequence = False
         , song = initialSong
         , currentNote = 0
-        , totalNotes = totalNotes
+        , totalSlots = totalSlots
         , paused = False
         , bpm = 128
         }
@@ -153,7 +153,7 @@ update msg model =
         Tick _ ->
             let
                 newNote =
-                    (model.currentNote + 1) % model.totalNotes
+                    (model.currentNote + 1) % model.totalSlots
 
                 newModel =
                     { model | currentNote = newNote }
