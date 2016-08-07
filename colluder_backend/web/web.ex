@@ -70,6 +70,8 @@ defmodule ColluderBackend.Web do
       import Ecto
       import Ecto.Query
       import ColluderBackend.Gettext
+
+      alias ColluderBackend.{CollusionSupervisor, CollusionServer}
     end
   end
 

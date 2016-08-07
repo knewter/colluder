@@ -25,6 +25,8 @@ defmodule ColluderBackend.ChannelCase do
       import Ecto.Changeset
       import Ecto.Query
 
+      alias ColluderBackend.{CollusionServer}
+
 
       # The default endpoint for testing
       @endpoint ColluderBackend.Endpoint
