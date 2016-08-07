@@ -12,8 +12,6 @@ config :logger, level: :warn
 # Configure your database
 config :colluder_backend, ColluderBackend.Repo,
   adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
   database: "colluder_backend_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox

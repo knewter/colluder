@@ -22,6 +22,7 @@ defmodule ColluderBackend.ModelCase do
       import Ecto.Changeset
       import Ecto.Query
       import ColluderBackend.ModelCase
+      alias ColluderBackend.{Track, Song}
     end
   end
 

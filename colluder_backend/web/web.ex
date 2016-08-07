@@ -23,6 +23,7 @@ defmodule ColluderBackend.Web do
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
+      alias ColluderBackend.{Track, Song}
     end
   end
 

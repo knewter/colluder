@@ -18,3 +18,10 @@ Ready to run in production? Please [check our deployment guides](http://www.phoe
   * Docs: https://hexdocs.pm/phoenix
   * Mailing list: http://groups.google.com/group/phoenix-talk
   * Source: https://github.com/phoenixframework/phoenix
+
+## Data Model
+
+```sh
+mix phoenix.gen.model Song songs
+mix phoenix.gen.model Track tracks song_id:references:songs slots:map
+```
