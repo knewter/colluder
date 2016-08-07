@@ -1,0 +1,45 @@
+defmodule Phoenix.PubSub.FederationSerializer do
+  @moduledoc false
+
+  @behaviour Phoenix.Transports.Serializer
+
+  def fastlane!(%Broadcast{} = msg) do
+    {:socket_push, :text, Poison.encode_to_iodata!(%Message{
+      topic: msg.topic,
+      event: msg.event,
+      payload: msg.payload
+    })}
+  end
+
+  def encode!(%Reply{} = reply) do
+    {:socket_push, :text, Poison.encode_to_iodata!(%Message{
+      topic: reply.topic,
+      event: "phx_reply",
+      ref: reply.ref,
+      payload: %{status: reply.status, response: reply.payload}
+    })}
+  end
+  def encode!(%Message{} = msg) do
+    {:socket_push, :text, Poison.encode_to_iodata!(msg)}
+  end
+
+  def decode!(message, _opts) do
+    message
+    |> Poison.decode!()
+    |> Phoenix.Socket.Message.from_map!()
+  def from_map!(map) when is_map(map) do
+    try do
+      %Phoenix.Socket.Message{
+        topic: Map.fetch!(map, "topic"),
+        event: Map.fetch!(map, "event"),
+        payload: Map.fetch!(map, "payload"),
+        ref: Map.fetch!(map, "ref")
+      }
+    rescue
+      err in [KeyError] ->
+        raise Phoenix.Socket.InvalidMessageError, message: "missing key #{inspect err.key}"
+    end
+  end
+
+  end
+end
