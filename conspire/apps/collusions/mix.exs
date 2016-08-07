@@ -21,7 +21,8 @@ defmodule Collusions.Mixfile do
 
   defp deps do
     [
-      { :uuid, "~> 1.1" }
+      { :uuid, "~> 1.1" },
+      { :dialyxir, "~> 0.3.5", only: [:dev] }
     ]
   end
 end
