@@ -23,7 +23,7 @@ defmodule Collusions.Song do
 
   def initial_slots do
     for i <- (0..19), into: %{} do
-      {i, false}
+      {i, true}
     end
   end
 end

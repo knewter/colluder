@@ -1,4 +1,4 @@
-defimpl Poison.Encoder, for: Collusions.Collusion.Song do
+defimpl Poison.Encoder, for: Collusions.Song do
   def encode(%{id: id, tracks: tracks}, _options) do
     %{
       id: id,
