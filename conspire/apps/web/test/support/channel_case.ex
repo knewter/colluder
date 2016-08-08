@@ -19,7 +19,6 @@ defmodule Conspire.Web.ChannelCase do
     quote do
       # Import conveniences for testing with channels
       use Phoenix.ChannelTest
-      alias Collusions.{CollusionSupervisor, CollusionServer}
 
 
       # The default endpoint for testing

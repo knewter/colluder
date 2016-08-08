@@ -3,7 +3,7 @@ defmodule Conspire.Web.CollusionChannelTest do
   import TestHelper
 
   alias Conspire.Web.CollusionChannel
-  alias Collusions.Collusion.Song
+  alias Collusions.Song
 
   describe "interacting with a collusion" do
     setup [:start_collusion]
@@ -18,10 +18,10 @@ defmodule Conspire.Web.CollusionChannelTest do
     end
 
     test "adding a track works", %{socket: socket, pid: pid} do
-      assert 2 = CollusionServer.track_count(pid)
+      assert 2 = Collusions.Server.track_count(pid)
       ref = push socket, "track:add", %{}
       assert_reply ref, :ok
-      assert 3 = CollusionServer.track_count(pid)
+      assert 3 = Collusions.Server.track_count(pid)
     end
   end
 
