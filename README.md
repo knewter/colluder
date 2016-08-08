@@ -18,8 +18,7 @@ The elm-based music editor lives in the `elm` subdirectory.
 
 ### Phoenix
 
-The collaboration and persistence bits live in the `colluder_backend`
-subdirectory.
+The collaboration and persistence bits live in the `conspire` subdirectory.
 
 ## License
 
