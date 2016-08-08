@@ -1,4 +1,4 @@
-defmodule Collusions.Collusion.Song do
+defmodule Collusions.Song do
   defstruct [:id, :tracks]
 
   def init(id) do

@@ -1,4 +1,4 @@
-defmodule Collusions.CollusionSupervisor do
+defmodule Collusions.Supervisor do
   use Supervisor
   @name CollusionSupervisor
 
@@ -12,7 +12,7 @@ defmodule Collusions.CollusionSupervisor do
 
   def init(_) do
     children = [
-      worker(Collusions.CollusionServer, [])
+      worker(Collusions.Server, [])
     ]
 
     supervise(children, strategy: :simple_one_for_one)

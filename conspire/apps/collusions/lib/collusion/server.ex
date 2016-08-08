@@ -1,6 +1,6 @@
-defmodule Collusions.CollusionServer do
+defmodule Collusions.Server do
   use GenServer
-  alias Collusions.Collusion.Song
+  alias Collusions.Song
 
   ### Public API
   def start_link(id) do
@@ -73,10 +73,10 @@ defmodule Collusions.CollusionServer do
 
   def handle_cast(:add_track, state) do
     next_num = get_track_count(state)
-    {:noreply, put_in(state, [:tracks, next_num], Song.initial_track())}
+    {:noreply, put_in(state.tracks[next_num], Song.initial_track())}
   end
   def handle_cast({:set_slot, track_num, slot, val}, state) do
-    {:noreply, put_in(state, [:tracks, track_num, :slots, slot], val)}
+    {:noreply, put_in(state.tracks[track_num].slots[slot], val)}
   end
 
   defp get_track_count(state) do

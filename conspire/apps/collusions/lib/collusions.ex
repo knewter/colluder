@@ -5,7 +5,7 @@ defmodule Collusions do
     import Supervisor.Spec, warn: false
 
     children = [
-      supervisor(Collusions.CollusionSupervisor, [])
+      supervisor(Collusions.Supervisor, [])
     ]
 
     opts = [strategy: :one_for_one, name: Collusions.Supervisor]
