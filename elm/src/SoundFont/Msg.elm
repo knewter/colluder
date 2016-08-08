@@ -2,6 +2,7 @@ module SoundFont.Msg exposing (..)
 
 import SoundFont.Types exposing (..)
 import Time
+import Phoenix.Socket
 
 
 type Msg
@@ -21,4 +22,6 @@ type Msg
     | AddTrack
     | TogglePaused
     | SetBPM Int
+    | ConnectSocket
+    | PhoenixMsg (Phoenix.Socket.Msg Msg)
     | NoOp

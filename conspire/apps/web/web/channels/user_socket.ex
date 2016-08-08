@@ -3,6 +3,7 @@ defmodule Conspire.Web.UserSocket do
 
   ## Channels
   # channel "room:*", Conspire.Web.RoomChannel
+  channel "collusion:*", Conspire.Web.CollusionChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket

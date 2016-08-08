@@ -1,6 +1,8 @@
 defmodule Collusions.Collusion.Song do
+  defstruct [:id, :tracks]
+
   def init(id) do
-    %{
+    %__MODULE__{
       id: id,
       tracks: initial_tracks
     }

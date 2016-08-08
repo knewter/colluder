@@ -15,6 +15,9 @@ import Time
 import Json.Decode as JD exposing ((:=))
 import MidiTable
 import Styles
+import Phoenix.Socket
+import Phoenix.Channel
+import Phoenix.Push
 
 
 main =
@@ -50,6 +53,7 @@ type alias Model =
     , totalSlots : Int
     , paused : Bool
     , bpm : Int
+    , phxSocket : Maybe (Phoenix.Socket.Socket Msg)
     }
 
 
@@ -71,6 +75,17 @@ track =
     }
 
 
+socketServer : String
+socketServer =
+    "ws://localhost:4000/socket/websocket"
+
+
+initPhxSocket : Phoenix.Socket.Socket Msg
+initPhxSocket =
+    Phoenix.Socket.init socketServer
+        |> Phoenix.Socket.withDebug
+
+
 init =
     let
         initialSong =
@@ -88,6 +103,7 @@ init =
         , totalSlots = totalSlots
         , paused = False
         , bpm = 128
+        , phxSocket = Nothing
         }
 
 
@@ -223,8 +239,40 @@ update msg model =
             in
                 { model | song = newSong } ! []
 
+        ConnectSocket ->
+            let
+                collusionChannelName =
+                    "collusion:foobar"
+
+                collusionChannel =
+                    Phoenix.Channel.init collusionChannelName
+
+                phxSocketInit =
+                    initPhxSocket
+
+                ( phxSocket, phxJoinCmd ) =
+                    Phoenix.Socket.join collusionChannel phxSocketInit
+            in
+                ( { model | phxSocket = Just phxSocket }
+                , Cmd.map PhoenixMsg phxJoinCmd
+                )
+
         NoOp ->
             ( model, Cmd.none )
+
+        PhoenixMsg msg ->
+            case model.phxSocket of
+                Nothing ->
+                    model ! []
+
+                Just modelPhxSocket ->
+                    let
+                        ( phxSocket, phxCmd ) =
+                            Phoenix.Socket.update msg modelPhxSocket
+                    in
+                        ( { model | phxSocket = Just phxSocket }
+                        , Cmd.map PhoenixMsg phxCmd
+                        )
 
 
 requestNotes : Model -> List (Cmd Msg)
@@ -297,7 +345,18 @@ view model =
             , viewMetadata model
             , viewTopControls model
             , viewSongEditor model
+            , viewConnection model
             ]
+
+
+viewConnection : Model -> Html Msg
+viewConnection model =
+    case model.phxSocket of
+        Nothing ->
+            button [ onClick ConnectSocket ] [ text "Connect to backend" ]
+
+        _ ->
+            div [] []
 
 
 viewTopControls : Model -> Html Msg
