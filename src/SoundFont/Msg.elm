@@ -2,6 +2,7 @@ module SoundFont.Msg exposing (..)
 
 import SoundFont.Types exposing (..)
 import Time
+import Material
 
 
 type Msg
@@ -21,4 +22,4 @@ type Msg
     | AddTrack
     | TogglePaused
     | SetBPM Int
-    | NoOp
+    | Mdl (Material.Msg Msg)

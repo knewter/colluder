@@ -8,6 +8,7 @@ import Time
 import Update
 import Model exposing (Model, Track, init)
 import View exposing (view)
+import Material.Menu as Menu
 
 
 main : Program Never
@@ -41,6 +42,7 @@ subscriptions model =
          , fontsLoadedSub
          , playedNoteSub
          , playSequenceStartedSub
+         , Menu.subs Mdl model.mdl
          ]
             ++ (tickSub model)
         )

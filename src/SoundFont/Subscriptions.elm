@@ -1,7 +1,6 @@
 module SoundFont.Subscriptions exposing (..)
 
 import SoundFont.Ports exposing (..)
-import SoundFont.Types exposing (..)
 import SoundFont.Msg exposing (..)
 
 

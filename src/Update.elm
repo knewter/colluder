@@ -5,6 +5,7 @@ import SoundFont.Msg exposing (..)
 import Dict exposing (Dict)
 import Model exposing (Model, Song, Track, Slots, track, trackSlots)
 import SoundFont.Ports exposing (..)
+import Material
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -102,8 +103,8 @@ update msg model =
             , Cmd.none
             )
 
-        NoOp ->
-            ( model, Cmd.none )
+        Mdl msg' ->
+            Material.update msg' model
 
 
 nextTrackId : Song -> Int

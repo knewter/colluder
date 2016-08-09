@@ -2,6 +2,7 @@ module Model exposing (Model, Song, Track, Slots, track, trackSlots, init)
 
 import Dict exposing (Dict)
 import SoundFont.Types exposing (..)
+import Material
 
 
 type alias Song =
@@ -29,6 +30,7 @@ type alias Model =
     , totalNotes : Int
     , paused : Bool
     , bpm : Int
+    , mdl : Material.Model
     }
 
 
@@ -62,6 +64,7 @@ init =
     , totalNotes = totalNotes
     , paused = False
     , bpm = 128
+    , mdl = Material.model
     }
 
 
