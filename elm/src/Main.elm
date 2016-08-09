@@ -13,6 +13,7 @@ import SoundFont.Subscriptions exposing (..)
 import Dict exposing (Dict)
 import Time
 import Json.Decode as JD exposing ((:=))
+import Json.Encode as JE
 import MidiTable
 import Styles
 import Phoenix.Socket
@@ -237,13 +238,13 @@ update msg model =
                     model.song
                         |> Dict.insert newTrackId track
             in
-                { model | song = newSong } ! []
+                addTrack
+                    ({ model | song = newSong } ! [])
+                    newTrackId
+                    track
 
         ConnectSocket ->
             let
-                collusionChannelName =
-                    "collusion:foobar"
-
                 collusionChannel =
                     Phoenix.Channel.init collusionChannelName
 
@@ -252,11 +253,32 @@ update msg model =
 
                 ( phxSocket, phxJoinCmd ) =
                     Phoenix.Socket.join collusionChannel phxSocketInit
+
+                phxSocket2 =
+                    phxSocket
+                        |> Phoenix.Socket.on "collusion:state" collusionChannelName ReceiveState
             in
-                ( { model | phxSocket = Just phxSocket }
+                ( { model | phxSocket = Just phxSocket2 }
                 , Cmd.map PhoenixMsg phxJoinCmd
                 )
 
+        ReceiveState raw ->
+            model ! []
+
+        -- case JD.decodeValue conspireSongDecoder raw of
+        --     Ok song ->
+        --         let
+        --             _ =
+        --                 Debug.log "raw" raw
+        --         in
+        --             { model | song = song } ! []
+        --
+        --     Err error ->
+        --         let
+        --             _ =
+        --                 Debug.log "Error" error
+        --         in
+        --             model ! []
         NoOp ->
             ( model, Cmd.none )
 
@@ -273,6 +295,15 @@ update msg model =
                         ( { model | phxSocket = Just phxSocket }
                         , Cmd.map PhoenixMsg phxCmd
                         )
+
+
+
+-- conspireSongDecoder : JD.Decoder Song
+-- conspireSongDecoder =
+--     JD.succeed
+--         Dict.empty
+--         |> Dict.insert 0 track
+--         |> Dict.insert 1 track
 
 
 requestNotes : Model -> List (Cmd Msg)
@@ -318,6 +349,14 @@ subscriptions model =
                             1 / (toFloat model.bpm)
                     in
                         [ Time.every (Time.minute * interval) Tick ]
+
+        phxSub =
+            case model.phxSocket of
+                Nothing ->
+                    []
+
+                Just phxSocket ->
+                    [ Phoenix.Socket.listen phxSocket PhoenixMsg ]
     in
         Sub.batch
             ([ audioContextSub
@@ -327,6 +366,7 @@ subscriptions model =
              , playSequenceStartedSub
              ]
                 ++ tickSub
+                ++ phxSub
             )
 
 
@@ -468,3 +508,35 @@ viewNoteOption : Int -> Track -> ( Int, ( String, Int ) ) -> Html Msg
 viewNoteOption trackId track ( noteId, ( note, octave ) ) =
     option [ value <| toString noteId, selected (noteId == track.note.id) ]
         [ text <| note ++ " (" ++ (toString octave) ++ ")" ]
+
+
+addTrack : ( Model, Cmd Msg ) -> Int -> Track -> ( Model, Cmd Msg )
+addTrack ( model, cmd ) trackId track =
+    case model.phxSocket of
+        Nothing ->
+            ( model, cmd )
+
+        Just modelPhxSocket ->
+            let
+                payload =
+                    (JE.object [])
+
+                push' =
+                    Phoenix.Push.init "track:add" collusionChannelName
+                        |> Phoenix.Push.withPayload payload
+
+                ( phxSocket, phxCmd ) =
+                    Phoenix.Socket.push push' modelPhxSocket
+            in
+                ( { model
+                    | phxSocket = Just phxSocket
+                  }
+                , Cmd.batch
+                    [ cmd
+                    , Cmd.map PhoenixMsg phxCmd
+                    ]
+                )
+
+
+collusionChannelName =
+    "collusion:foobar"

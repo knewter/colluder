@@ -13,6 +13,7 @@ defmodule Conspire.Web.CollusionChannel do
   end
 
   def handle_in("track:add", _, socket) do
+    IO.puts "added track"
     :ok = socket.assigns[:pid] |> Collusions.Server.add_track
     {:reply, :ok, socket}
   end

@@ -3,6 +3,7 @@ module SoundFont.Msg exposing (..)
 import SoundFont.Types exposing (..)
 import Time
 import Phoenix.Socket
+import Json.Encode as JE
 
 
 type Msg
@@ -24,4 +25,5 @@ type Msg
     | SetBPM Int
     | ConnectSocket
     | PhoenixMsg (Phoenix.Socket.Msg Msg)
+    | ReceiveState JE.Value
     | NoOp
