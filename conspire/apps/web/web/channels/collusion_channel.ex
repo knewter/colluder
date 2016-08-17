@@ -20,14 +20,12 @@ defmodule Conspire.Web.CollusionChannel do
   end
 
   def handle_in("note:check", msg, socket) do
-    IO.inspect msg
     :ok = socket.assigns[:pid] |> Collusions.Server.set_slot(msg["trackId"], msg["slotId"], msg["on"])
     broadcast_state(socket)
     {:reply, :ok, socket}
   end
 
   def handle_in("note:set", msg, socket) do
-    IO.inspect msg
     :ok = socket.assigns[:pid] |> Collusions.Server.set_note(msg["trackId"], msg["noteId"])
     broadcast_state(socket)
     {:reply, :ok, socket}

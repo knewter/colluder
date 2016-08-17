@@ -83,7 +83,7 @@ viewTrackNoteChooser model trackId =
             130
 
         octaveIdPrefix =
-            230
+            330
 
         noteButton : Int -> String -> Html Msg
         noteButton noteNum note =
