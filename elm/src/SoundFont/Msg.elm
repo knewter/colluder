@@ -4,6 +4,7 @@ import SoundFont.Types exposing (..)
 import Time
 import Phoenix.Socket
 import Json.Encode as JE
+import Material
 
 
 type Msg
@@ -26,4 +27,8 @@ type Msg
     | ConnectSocket
     | PhoenixMsg (Phoenix.Socket.Msg Msg)
     | ReceiveState JE.Value
+    | Mdl (Material.Msg Msg)
+    | SetEditingTrack Int
+    | ChooseNote String
+    | ChooseOctave Int
     | NoOp

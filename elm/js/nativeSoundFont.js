@@ -23,7 +23,7 @@ function loadSoundFonts(dirname) {
     }
     else {
       extension = '-mp3.js'
-    }    
+    }
     Soundfont.nameToUrl = function (name) { return dir + name + extension }
     Soundfont.loadBuffers(myapp.context, name)
         .then(function (buffers) {
@@ -37,7 +37,7 @@ myapp.ports.requestPlayNote.subscribe(playNote);
 
 /* play a midi note */
 function playNote(midiNote) {
-  var res = playMidiNote(midiNote); 
+  var res = playMidiNote(midiNote);
   myapp.ports.playedNote.send(res);
 }
 
@@ -47,7 +47,7 @@ myapp.ports.requestPlayNoteSequence.subscribe(playMidiNoteSequence);
 /* play a sequence of midi notes */
 function playMidiNoteSequence(midiNotes) {
   /* console.log("play sequence"); */
-  if (myapp.buffers) { 
+  if (myapp.buffers) {
     midiNotes.map(playMidiNote);
     myapp.ports.playSequenceStarted.send(true);
   }
@@ -78,7 +78,7 @@ canPlayOgg = function() {
 
 /* play a midi note */
 function playMidiNote(midiNote) {
-  if (myapp.buffers) { 
+  if (myapp.buffers) {
     /* console.log("playing buffer at time: " + midiNote.timeOffset + " with gain: " + midiNote.gain + " for note: " + midiNote.id) */
     var buffer = myapp.buffers[midiNote.id]
     var source = myapp.context.createBufferSource();
