@@ -7,7 +7,6 @@ import Model exposing (Model, Song, Track, Slots, track, trackSlots)
 import SoundFont.Ports exposing (..)
 import Material
 import MidiTable exposing (getNoteIdByNoteAndOctave)
-import Debug
 import Phoenix.Socket
 import Phoenix.Push
 import Phoenix.Channel
@@ -18,7 +17,7 @@ import SongDecoder
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case Debug.log "msg: " msg of
+    case msg of
         InitialiseAudioContext ->
             ( model
             , initialiseAudioContext ()
@@ -87,20 +86,24 @@ update msg model =
                 )
 
         CheckNote trackId slotId on ->
-            ( { model
-                | song = model.song |> Dict.update trackId (checkSlot slotId)
-              }
-            , Cmd.none
-            )
+            let
+                newModel =
+                    { model
+                        | song = model.song |> Dict.update trackId (checkSlot slotId)
+                    }
+            in
+                checkNote ( newModel, Cmd.none ) trackId slotId on
 
         SetNote trackId midiNote ->
-            ( { model
-                | song =
-                    model.song
-                        |> Dict.update trackId (setMidiNote midiNote)
-              }
-            , Cmd.none
-            )
+            let
+                newModel =
+                    { model
+                        | song =
+                            model.song
+                                |> Dict.update trackId (setMidiNote midiNote)
+                    }
+            in
+                setNote ( newModel, Cmd.none ) trackId midiNote
 
         AddTrack ->
             let
@@ -123,30 +126,26 @@ update msg model =
             ( { model | chosenNote = Just note }, Cmd.none )
 
         ChooseOctave octave ->
-            let
-                _ =
-                    Debug.log "model: " model
-            in
-                case model.trackBeingEdited of
-                    Nothing ->
-                        model ! []
+            case model.trackBeingEdited of
+                Nothing ->
+                    model ! []
 
-                    Just trackId ->
-                        case model.chosenNote of
-                            Nothing ->
-                                model ! []
+                Just trackId ->
+                    case model.chosenNote of
+                        Nothing ->
+                            model ! []
 
-                            Just note ->
-                                case getNoteIdByNoteAndOctave ( note, octave ) of
-                                    Nothing ->
-                                        model ! []
+                        Just note ->
+                            case getNoteIdByNoteAndOctave ( note, octave ) of
+                                Nothing ->
+                                    model ! []
 
-                                    Just noteId ->
-                                        let
-                                            newModel =
-                                                { model | chosenNote = Nothing, trackBeingEdited = Nothing }
-                                        in
-                                            update (SetNote trackId (MidiNote noteId 0.0 1.0)) newModel
+                                Just noteId ->
+                                    let
+                                        newModel =
+                                            { model | chosenNote = Nothing, trackBeingEdited = Nothing }
+                                    in
+                                        update (SetNote trackId (MidiNote noteId 0.0 1.0)) newModel
 
         ConnectSocket ->
             let
@@ -221,6 +220,68 @@ newSlots slotId =
         (Maybe.map not)
 
 
+setNote : ( Model, Cmd Msg ) -> Int -> MidiNote -> ( Model, Cmd Msg )
+setNote ( model, cmd ) trackId note =
+    case model.phxSocket of
+        Nothing ->
+            ( model, cmd )
+
+        Just modelPhxSocket ->
+            let
+                _ =
+                    Debug.log "inside setNote just" 1
+
+                payload =
+                    (JE.object [ ( "trackId", JE.int trackId ), ( "noteId", JE.int note.id ) ])
+
+                push' =
+                    Phoenix.Push.init "note:set" collusionChannelName
+                        |> Phoenix.Push.withPayload payload
+
+                ( phxSocket, phxCmd ) =
+                    Phoenix.Socket.push push' modelPhxSocket
+            in
+                ( { model
+                    | phxSocket = Just phxSocket
+                  }
+                , Cmd.batch
+                    [ cmd
+                    , Cmd.map PhoenixMsg phxCmd
+                    ]
+                )
+
+
+checkNote : ( Model, Cmd Msg ) -> Int -> Int -> Bool -> ( Model, Cmd Msg )
+checkNote ( model, cmd ) trackId slotId on =
+    case model.phxSocket of
+        Nothing ->
+            ( model, cmd )
+
+        Just modelPhxSocket ->
+            let
+                _ =
+                    Debug.log "inside checknote just" 1
+
+                payload =
+                    (JE.object [ ( "trackId", JE.int trackId ), ( "slotId", JE.int slotId ), ( "on", JE.bool on ) ])
+
+                push' =
+                    Phoenix.Push.init "note:check" collusionChannelName
+                        |> Phoenix.Push.withPayload payload
+
+                ( phxSocket, phxCmd ) =
+                    Phoenix.Socket.push push' modelPhxSocket
+            in
+                ( { model
+                    | phxSocket = Just phxSocket
+                  }
+                , Cmd.batch
+                    [ cmd
+                    , Cmd.map PhoenixMsg phxCmd
+                    ]
+                )
+
+
 checkSlot : Int -> Maybe Track -> Maybe Track
 checkSlot slotId maybeTrack =
     Maybe.map
@@ -289,7 +350,10 @@ socketServer =
 initPhxSocket : Phoenix.Socket.Socket Msg
 initPhxSocket =
     Phoenix.Socket.init socketServer
-        |> Phoenix.Socket.withDebug
+
+
+
+--|> Phoenix.Socket.withDebug
 
 
 collusionChannelName : String

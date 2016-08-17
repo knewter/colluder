@@ -34,6 +34,11 @@ defmodule Collusions.Server do
     GenServer.cast(pid, {:set_slot, track_num, slot, val})
   end
 
+  @spec set_note(pid(), non_neg_integer(), non_neg_integer()) :: :ok
+  def set_note(pid, track_num, note_id) do
+    GenServer.cast(pid, {:set_note, track_num, note_id})
+  end
+
   def add_track(pid) do
     GenServer.cast(pid, :add_track)
   end
@@ -77,6 +82,9 @@ defmodule Collusions.Server do
   end
   def handle_cast({:set_slot, track_num, slot, val}, state) do
     {:noreply, put_in(state.tracks[track_num].slots[slot], val)}
+  end
+  def handle_cast({:set_note, track_num, note_id}, state) do
+    {:noreply, put_in(state.tracks[track_num].note, note_id)}
   end
 
   defp get_track_count(state) do
