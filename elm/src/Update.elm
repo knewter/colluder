@@ -8,6 +8,12 @@ import SoundFont.Ports exposing (..)
 import Material
 import MidiTable exposing (getNoteIdByNoteAndOctave)
 import Debug
+import Phoenix.Socket
+import Phoenix.Push
+import Phoenix.Channel
+import Json.Encode as JE
+import Json.Decode as JD
+import SongDecoder
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -162,7 +168,16 @@ update msg model =
                 )
 
         ReceiveState raw ->
-            model ! []
+            case JD.decodeValue SongDecoder.decodeSong raw of
+                Err err ->
+                    let
+                        _ =
+                            Debug.log "Error decoding song: " err
+                    in
+                        model ! []
+
+                Ok song ->
+                    { model | song = song } ! []
 
         Mdl msg' ->
             Material.update msg' model
@@ -275,3 +290,8 @@ initPhxSocket : Phoenix.Socket.Socket Msg
 initPhxSocket =
     Phoenix.Socket.init socketServer
         |> Phoenix.Socket.withDebug
+
+
+collusionChannelName : String
+collusionChannelName =
+    "collusion:foobar"

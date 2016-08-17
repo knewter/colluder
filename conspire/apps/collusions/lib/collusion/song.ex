@@ -17,7 +17,8 @@ defmodule Collusions.Song do
 
   def initial_track do
     %{
-      slots: initial_slots
+      slots: initial_slots,
+      note: 69
     }
   end
 

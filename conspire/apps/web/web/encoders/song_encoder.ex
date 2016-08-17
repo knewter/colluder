@@ -18,6 +18,6 @@ defimpl Poison.Encoder, for: Collusions.Song do
         {"#{k}", v}
       end
 
-    %{ slots: slots }
+    %{ slots: slots, note: track.note }
   end
 end

@@ -3,6 +3,8 @@ module Model exposing (Model, Song, Track, Slots, track, trackSlots, init)
 import Dict exposing (Dict)
 import SoundFont.Types exposing (..)
 import Material
+import Phoenix.Socket
+import SoundFont.Msg exposing (..)
 
 
 type alias Song =
@@ -33,6 +35,7 @@ type alias Model =
     , mdl : Material.Model
     , trackBeingEdited : Maybe Int
     , chosenNote : Maybe String
+    , phxSocket : Maybe (Phoenix.Socket.Socket Msg)
     }
 
 

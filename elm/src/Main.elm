@@ -5,17 +5,11 @@ import SoundFont.Ports exposing (..)
 import SoundFont.Msg exposing (..)
 import SoundFont.Subscriptions exposing (..)
 import Time
-import Json.Decode as JD exposing ((:=))
-import Json.Encode as JE
-import MidiTable
-import Styles
 import Phoenix.Socket
-import Phoenix.Channel
-import Phoenix.Push
 import Update
 import Model exposing (Model, Track, init)
 import View exposing (view)
-import Material.Menu as Menu
+import Material
 
 
 main : Program Never
@@ -92,16 +86,6 @@ tickSub model =
 
         False ->
             [ Time.every (Time.minute * (interval model)) Tick ]
-
-
-viewNoteOption : Int -> Track -> ( Int, ( String, Int ) ) -> Html Msg
-viewNoteOption trackId track ( noteId, ( note, octave ) ) =
-    option [ value <| toString noteId, selected (noteId == track.note.id) ]
-        [ text <| note ++ " (" ++ (toString octave) ++ ")" ]
-
-
-collusionChannelName =
-    "collusion:foobar"
 
 
 interval : Model -> Float
