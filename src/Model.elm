@@ -31,6 +31,8 @@ type alias Model =
     , paused : Bool
     , bpm : Int
     , mdl : Material.Model
+    , trackBeingEdited : Maybe Int
+    , chosenNote : Maybe String
     }
 
 
@@ -65,6 +67,8 @@ init =
     , paused = False
     , bpm = 128
     , mdl = Material.model
+    , trackBeingEdited = Nothing
+    , chosenNote = Nothing
     }
 
 

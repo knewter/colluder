@@ -6,11 +6,13 @@ import Dict exposing (Dict)
 import Model exposing (Model, Song, Track, Slots, track, trackSlots)
 import SoundFont.Ports exposing (..)
 import Material
+import MidiTable exposing (getNoteIdByNoteAndOctave)
+import Debug
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
+    case Debug.log "msg: " msg of
         InitialiseAudioContext ->
             ( model
             , initialiseAudioContext ()
@@ -102,6 +104,38 @@ update msg model =
               }
             , Cmd.none
             )
+
+        SetEditingTrack trackId ->
+            ( { model | trackBeingEdited = Just trackId }, Cmd.none )
+
+        ChooseNote note ->
+            ( { model | chosenNote = Just note }, Cmd.none )
+
+        ChooseOctave octave ->
+            let
+                _ =
+                    Debug.log "model: " model
+            in
+                case model.trackBeingEdited of
+                    Nothing ->
+                        model ! []
+
+                    Just trackId ->
+                        case model.chosenNote of
+                            Nothing ->
+                                model ! []
+
+                            Just note ->
+                                case getNoteIdByNoteAndOctave ( note, octave ) of
+                                    Nothing ->
+                                        model ! []
+
+                                    Just noteId ->
+                                        let
+                                            newModel =
+                                                { model | chosenNote = Nothing, trackBeingEdited = Nothing }
+                                        in
+                                            update (SetNote trackId (MidiNote noteId 0.0 1.0)) newModel
 
         Mdl msg' ->
             Material.update msg' model

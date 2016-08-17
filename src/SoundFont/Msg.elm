@@ -23,3 +23,6 @@ type Msg
     | TogglePaused
     | SetBPM Int
     | Mdl (Material.Msg Msg)
+    | SetEditingTrack Int
+    | ChooseNote String
+    | ChooseOctave Int
