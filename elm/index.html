@@ -13,7 +13,8 @@
     <script src="./target/elm.js"></script>
     <script>
       var node = document.getElementById('elmSoundFont');
-      var myapp = Elm.Main.embed(node);
+      var myapp = Elm.Main.embed(node, { socketServer: "ws://localhost:4000/socket/websocket" } );
+      //var myapp = Elm.Main.embed(node, { socketServer: "ws://0e5e0a28.ngrok.io/socket/websocket" } );
     </script>
     <script src="./js/nativeSoundFont.js"></script>
   </body>

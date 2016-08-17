@@ -15,25 +15,37 @@ defmodule Conspire.Web.CollusionChannel do
 
   def handle_in("track:add", _, socket) do
     :ok = socket.assigns[:pid] |> Collusions.Server.add_track
+    broadcast_state(socket)
     {:reply, :ok, socket}
   end
 
   def handle_in("note:check", msg, socket) do
     IO.inspect msg
     :ok = socket.assigns[:pid] |> Collusions.Server.set_slot(msg["trackId"], msg["slotId"], msg["on"])
+    broadcast_state(socket)
     {:reply, :ok, socket}
   end
 
   def handle_in("note:set", msg, socket) do
     IO.inspect msg
     :ok = socket.assigns[:pid] |> Collusions.Server.set_note(msg["trackId"], msg["noteId"])
+    broadcast_state(socket)
     {:reply, :ok, socket}
   end
 
   def handle_info(:push_state, socket) do
     :timer.send_after(@refresh_rate, :push_state)
+    push_state(socket)
+    {:noreply, socket}
+  end
+
+  def push_state(socket) do
     state = socket.assigns[:pid] |> Collusions.Server.get_state
     push socket, "collusion:state", state
-    {:noreply, socket}
+  end
+
+  def broadcast_state(socket) do
+    state = socket.assigns[:pid] |> Collusions.Server.get_state
+    broadcast! socket, "collusion:state", state
   end
 end

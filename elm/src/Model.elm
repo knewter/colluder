@@ -1,10 +1,15 @@
-module Model exposing (Model, Song, Track, Slots, track, trackSlots, init)
+module Model exposing (Model, Song, Track, Slots, ColluderFlags, track, trackSlots, init)
 
 import Dict exposing (Dict)
 import SoundFont.Types exposing (..)
 import Material
 import Phoenix.Socket
 import SoundFont.Msg exposing (..)
+
+
+type alias ColluderFlags =
+    { socketServer : String
+    }
 
 
 type alias Song =
@@ -36,6 +41,7 @@ type alias Model =
     , trackBeingEdited : Maybe Int
     , chosenNote : Maybe String
     , phxSocket : Maybe (Phoenix.Socket.Socket Msg)
+    , socketServer : String
     }
 
 
@@ -57,8 +63,8 @@ totalNotes =
     16
 
 
-init : Model
-init =
+init : ColluderFlags -> Model
+init colluderFlags =
     { audioContext = Nothing
     , oggEnabled = False
     , fontsLoaded = False
@@ -73,6 +79,7 @@ init =
     , trackBeingEdited = Nothing
     , chosenNote = Nothing
     , phxSocket = Nothing
+    , socketServer = colluderFlags.socketServer
     }
 
 

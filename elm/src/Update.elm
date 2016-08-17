@@ -153,7 +153,7 @@ update msg model =
                     Phoenix.Channel.init collusionChannelName
 
                 phxSocketInit =
-                    initPhxSocket
+                    initPhxSocket model
 
                 ( phxSocket, phxJoinCmd ) =
                     Phoenix.Socket.join collusionChannel phxSocketInit
@@ -342,14 +342,9 @@ addTrack ( model, cmd ) trackId track =
                 )
 
 
-socketServer : String
-socketServer =
-    "ws://localhost:4000/socket/websocket"
-
-
-initPhxSocket : Phoenix.Socket.Socket Msg
-initPhxSocket =
-    Phoenix.Socket.init socketServer
+initPhxSocket : Model -> Phoenix.Socket.Socket Msg
+initPhxSocket model =
+    Phoenix.Socket.init model.socketServer
 
 
 

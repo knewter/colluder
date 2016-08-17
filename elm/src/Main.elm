@@ -7,19 +7,28 @@ import SoundFont.Subscriptions exposing (..)
 import Time
 import Phoenix.Socket
 import Update
-import Model exposing (Model, Track, init)
+import Model exposing (Model, Track, ColluderFlags)
 import View exposing (view)
 import Material
 
 
-main : Program Never
+main : Program ColluderFlags
 main =
-    Html.program
-        { init = ( init, initCmds init )
+    Html.programWithFlags
+        { init = init
         , update = Update.update
         , view = View.view
         , subscriptions = subscriptions
         }
+
+
+init : ColluderFlags -> ( Model, Cmd Msg )
+init colluderFlags =
+    let
+        model =
+            Model.init colluderFlags
+    in
+        ( model, initCmds model )
 
 
 initCmds : Model -> Cmd Msg
