@@ -79,16 +79,10 @@ viewDialog model =
 viewTrackNoteChooser : Model -> Int -> Html Msg
 viewTrackNoteChooser model trackId =
     let
-        noteIdPrefix =
-            130
-
-        octaveIdPrefix =
-            330
-
         noteButton : Int -> String -> Html Msg
         noteButton noteNum note =
             Button.render Mdl
-                [ noteIdPrefix + noteNum ]
+                [ 7, noteNum ]
                 model.mdl
                 [ Options.css "width" "2rem"
                 , Button.onClick (ChooseNote note)
@@ -98,7 +92,7 @@ viewTrackNoteChooser model trackId =
         octaveButton : Int -> Int -> Html Msg
         octaveButton octaveNum octave =
             Button.render Mdl
-                [ octaveIdPrefix + octaveNum ]
+                [ 8, octaveNum ]
                 model.mdl
                 [ Options.css "width" "2rem"
                 , Dialog.closeOn "click"
