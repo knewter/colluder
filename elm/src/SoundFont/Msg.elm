@@ -22,8 +22,8 @@ type Msg
     | CheckNote Int Int Bool
     | SetNote Int MidiNote
     | AddTrack
-    | TogglePaused
     | SetBPM Int
+    | TogglePaused
     | ConnectSocket
     | PhoenixMsg (Phoenix.Socket.Msg Msg)
     | ReceiveState JE.Value

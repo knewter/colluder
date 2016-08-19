@@ -7,9 +7,7 @@ import Dict exposing (Dict)
 import Html exposing (Html, Attribute, text, div, input, button, table, tr, td, select, option, node, h1, p)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onClick, onCheck, onInput, targetValue)
-import SoundFont.Types exposing (..)
 import MidiTable
-import Json.Decode as JD exposing ((:=))
 import String
 import Array exposing (Array)
 import Material.Scheme
@@ -17,7 +15,6 @@ import Material.Layout as Layout
 import Material.Color as Color
 import Material.Button as Button
 import Material.Textfield as Textfield
-import Material.Menu as Menu
 import Material.Dialog as Dialog
 import Material.Options as Options
 
@@ -260,50 +257,20 @@ viewTrack model trackId track =
             )
 
 
-onChange : (Int -> Msg) -> Html.Attribute Msg
-onChange tagger =
-    on "change" <|
-        (JD.at [ "target", "selectedIndex" ] JD.int)
-            `JD.andThen` (JD.succeed << tagger)
-
-
 viewTrackMetadata : Model -> Int -> Track -> Html Msg
 viewTrackMetadata model trackId track =
-    let
-        setNote : Int -> Msg
-        setNote noteId =
-            SetNote trackId (MidiNote noteId 0.0 1.0)
+    case MidiTable.getNoteAndOctaveByNoteId track.note.id of
+        Nothing ->
+            text ""
 
-        midiNotesStartingPoint : Int
-        midiNotesStartingPoint =
-            300
-
-        menuItems : List (Menu.Item Msg)
-        menuItems =
-            (MidiTable.notesOctaves
-                |> Dict.toList
-                |> List.map
-                    --(viewNoteOption trackId track)
-                    (\( k, ( note, octave ) ) ->
-                        (Menu.item
-                            [ Menu.onSelect (setNote k) ]
-                            [ text (noteText ( note, octave )) ]
-                        )
-                    )
-            )
-    in
-        case MidiTable.getNoteAndOctaveByNoteId track.note.id of
-            Nothing ->
-                text ""
-
-            Just ( note, octave ) ->
-                Button.render Mdl
-                    [ 4 ]
-                    model.mdl
-                    [ Dialog.openOn "click"
-                    , Button.onClick <| SetEditingTrack trackId
-                    ]
-                    [ text <| note ++ (toString octave) ]
+        Just ( note, octave ) ->
+            Button.render Mdl
+                [ 4 ]
+                model.mdl
+                [ Dialog.openOn "click"
+                , Button.onClick <| SetEditingTrack trackId
+                ]
+                [ text <| note ++ (toString octave) ]
 
 
 viewNoteOption : Int -> Track -> ( Int, ( String, Int ) ) -> Html Msg
