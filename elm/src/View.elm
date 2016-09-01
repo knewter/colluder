@@ -70,81 +70,88 @@ viewDialog model =
             viewAbout model
 
         Just trackId ->
-            viewTrackNoteChooser model trackId
+            viewTrackNoteChooser model
 
 
-viewTrackNoteChooser : Model -> Int -> Html Msg
-viewTrackNoteChooser model trackId =
-    let
-        noteIdPrefix =
-            130
+noteButton : Model -> Int -> String -> Html Msg
+noteButton model noteNum note =
+    Button.render Mdl
+        [ 7, noteNum ]
+        model.mdl
+        [ Options.css "width" "2rem"
+        , Button.onClick (ChooseNote note)
+        ]
+        [ text note ]
 
-        octaveIdPrefix =
-            330
 
-        noteButton : Int -> String -> Html Msg
-        noteButton noteNum note =
-            Button.render Mdl
-                [ noteIdPrefix + noteNum ]
+octaveButton : Model -> Int -> Int -> Html Msg
+octaveButton model octaveNum octave =
+    Button.render Mdl
+        [ 8, octaveNum ]
+        model.mdl
+        [ Options.css "width" "2rem"
+        , Dialog.closeOn "click"
+        , Button.onClick (ChooseOctave octave)
+        ]
+        [ text <| toString octave ]
+
+
+octaveButtons : Model -> Array (Html Msg)
+octaveButtons model =
+    MidiTable.octaves
+        |> Array.indexedMap (octaveButton model)
+
+
+noteButtons : Model -> Array (Html Msg)
+noteButtons model =
+    MidiTable.notes
+        |> Array.indexedMap (noteButton model)
+
+
+pickNoteDialog : Model -> Html Msg
+pickNoteDialog model =
+    Dialog.view []
+        [ Dialog.title [] [ text "Pick the Note" ]
+        , Dialog.content []
+            (noteButtons model
+                |> Array.toList
+            )
+        , Dialog.actions []
+            [ Button.render Mdl
+                [ 5 ]
                 model.mdl
-                [ Options.css "width" "2rem"
-                , Button.onClick (ChooseNote note)
-                ]
-                [ text note ]
+                [ Dialog.closeOn "click" ]
+                [ text "Close" ]
+            ]
+        ]
 
-        octaveButton : Int -> Int -> Html Msg
-        octaveButton octaveNum octave =
-            Button.render Mdl
-                [ octaveIdPrefix + octaveNum ]
+
+pickOctaveDialog : Model -> Html Msg
+pickOctaveDialog model =
+    Dialog.view []
+        [ Dialog.title [] [ text "Pick the Octave" ]
+        , Dialog.content []
+            (octaveButtons model
+                |> Array.toList
+            )
+        , Dialog.actions []
+            [ Button.render Mdl
+                [ 6 ]
                 model.mdl
-                [ Options.css "width" "2rem"
-                , Dialog.closeOn "click"
-                , Button.onClick (ChooseOctave octave)
-                ]
-                [ text <| toString octave ]
+                [ Dialog.closeOn "click" ]
+                [ text "Close" ]
+            ]
+        ]
 
-        octaveButtons : Array (Html Msg)
-        octaveButtons =
-            MidiTable.octaves
-                |> Array.indexedMap octaveButton
 
-        noteButtons : Array (Html Msg)
-        noteButtons =
-            MidiTable.notes
-                |> Array.indexedMap noteButton
-    in
-        case model.chosenNote of
-            Nothing ->
-                Dialog.view []
-                    [ Dialog.title [] [ text "Pick the Note" ]
-                    , Dialog.content []
-                        (noteButtons
-                            |> Array.toList
-                        )
-                    , Dialog.actions []
-                        [ Button.render Mdl
-                            [ 5 ]
-                            model.mdl
-                            [ Dialog.closeOn "click" ]
-                            [ text "Close" ]
-                        ]
-                    ]
+viewTrackNoteChooser : Model -> Html Msg
+viewTrackNoteChooser model =
+    case model.chosenNote of
+        Nothing ->
+            pickNoteDialog model
 
-            Just _ ->
-                Dialog.view []
-                    [ Dialog.title [] [ text "Pick the Octave" ]
-                    , Dialog.content []
-                        (octaveButtons
-                            |> Array.toList
-                        )
-                    , Dialog.actions []
-                        [ Button.render Mdl
-                            [ 6 ]
-                            model.mdl
-                            [ Dialog.closeOn "click" ]
-                            [ text "Close" ]
-                        ]
-                    ]
+        Just _ ->
+            pickOctaveDialog model
 
 
 viewAbout : Model -> Html Msg
@@ -167,16 +174,11 @@ viewAbout model =
 viewTopControls : Model -> Html Msg
 viewTopControls model =
     let
-        { id } =
-            Styles.mainNamespace
-
         pauseText =
-            case model.paused of
-                True ->
-                    "unpause"
-
-                False ->
-                    "pause"
+            if model.paused then
+                "unpause"
+            else
+                "pause"
     in
         div []
             [ Button.render Mdl

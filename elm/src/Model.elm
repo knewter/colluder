@@ -60,7 +60,7 @@ trackSlots =
 
 totalNotes : Int
 totalNotes =
-    16
+    20
 
 
 init : ColluderFlags -> Model

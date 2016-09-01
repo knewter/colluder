@@ -24,7 +24,6 @@ defmodule Conspire.Web.CollusionChannelTest do
       assert 3 = Collusions.Server.track_count(pid)
     end
   end
-:qa
 
   defp start_collusion(_context) do
     id = new_id()
