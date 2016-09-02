@@ -1,7 +1,7 @@
 module View exposing (view)
 
 import SoundFont.Msg exposing (..)
-import Model exposing (Model, Track)
+import Model exposing (Model, Track, NoteChooserWizard(..))
 import Styles
 import Dict exposing (Dict)
 import Html exposing (Html, Attribute, text, div, input, button, table, tr, td, select, option, node, h1, p)
@@ -65,12 +65,15 @@ viewBody model =
 
 viewDialog : Model -> Html Msg
 viewDialog model =
-    case model.trackBeingEdited of
-        Nothing ->
+    case model.noteChooserWizard of
+        Pending ->
             viewAbout model
 
-        Just trackId ->
-            viewTrackNoteChooser model
+        TrackBeingEdited _ ->
+            pickNoteDialog model
+
+        ChosenNote _ _ ->
+            pickOctaveDialog model
 
 
 noteButton : Model -> Int -> String -> Html Msg
@@ -142,16 +145,6 @@ pickOctaveDialog model =
                 [ text "Close" ]
             ]
         ]
-
-
-viewTrackNoteChooser : Model -> Html Msg
-viewTrackNoteChooser model =
-    case model.chosenNote of
-        Nothing ->
-            pickNoteDialog model
-
-        Just _ ->
-            pickOctaveDialog model
 
 
 viewAbout : Model -> Html Msg

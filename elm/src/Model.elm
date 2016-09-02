@@ -1,4 +1,4 @@
-module Model exposing (Model, Song, Track, Slots, ColluderFlags, track, trackSlots, init)
+module Model exposing (Model, Song, Track, Slots, ColluderFlags, NoteChooserWizard(..), track, trackSlots, init)
 
 import Dict exposing (Dict)
 import SoundFont.Types exposing (..)
@@ -26,6 +26,12 @@ type alias Slots =
     Dict Int Bool
 
 
+type NoteChooserWizard
+    = Pending
+    | TrackBeingEdited Int
+    | ChosenNote Int String
+
+
 type alias Model =
     { audioContext : Maybe AudioContext
     , oggEnabled : Bool
@@ -38,8 +44,7 @@ type alias Model =
     , paused : Bool
     , bpm : Int
     , mdl : Material.Model
-    , trackBeingEdited : Maybe Int
-    , chosenNote : Maybe String
+    , noteChooserWizard : NoteChooserWizard
     , phxSocket : Maybe (Phoenix.Socket.Socket Msg)
     , socketServer : String
     }
@@ -76,8 +81,7 @@ init colluderFlags =
     , paused = False
     , bpm = 128
     , mdl = Material.model
-    , trackBeingEdited = Nothing
-    , chosenNote = Nothing
+    , noteChooserWizard = Pending
     , phxSocket = Nothing
     , socketServer = colluderFlags.socketServer
     }

@@ -3,7 +3,7 @@ module Update exposing (update)
 import SoundFont.Types exposing (..)
 import SoundFont.Msg exposing (..)
 import Dict exposing (Dict)
-import Model exposing (Model, Song, Track, Slots, track, trackSlots)
+import Model exposing (Model, Song, Track, Slots, NoteChooserWizard(..), track, trackSlots)
 import SoundFont.Ports exposing (..)
 import Material
 import MidiTable exposing (getNoteIdByNoteAndOctave)
@@ -120,32 +120,32 @@ update msg model =
                     track
 
         SetEditingTrack trackId ->
-            ( { model | trackBeingEdited = Just trackId }, Cmd.none )
+            ( { model | noteChooserWizard = TrackBeingEdited trackId }, Cmd.none )
 
         ChooseNote note ->
-            ( { model | chosenNote = Just note }, Cmd.none )
+            case model.noteChooserWizard of
+                TrackBeingEdited trackId ->
+                    ( { model | noteChooserWizard = ChosenNote trackId note }, Cmd.none )
 
-        ChooseOctave octave ->
-            case model.trackBeingEdited of
-                Nothing ->
+                _ ->
                     model ! []
 
-                Just trackId ->
-                    case model.chosenNote of
+        ChooseOctave octave ->
+            case model.noteChooserWizard of
+                ChosenNote trackId note ->
+                    case getNoteIdByNoteAndOctave ( note, octave ) of
                         Nothing ->
                             model ! []
 
-                        Just note ->
-                            case getNoteIdByNoteAndOctave ( note, octave ) of
-                                Nothing ->
-                                    model ! []
+                        Just noteId ->
+                            let
+                                newModel =
+                                    { model | noteChooserWizard = Pending }
+                            in
+                                update (SetNote trackId (MidiNote noteId 0.0 1.0)) newModel
 
-                                Just noteId ->
-                                    let
-                                        newModel =
-                                            { model | chosenNote = Nothing, trackBeingEdited = Nothing }
-                                    in
-                                        update (SetNote trackId (MidiNote noteId 0.0 1.0)) newModel
+                _ ->
+                    model ! []
 
         ConnectSocket ->
             let
