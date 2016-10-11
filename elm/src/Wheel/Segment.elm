@@ -97,32 +97,13 @@ grad model =
         end =
             Vec2.toTuple <| Vec2.scale model.radius model.centerDirection
 
-        hsl =
-            Color.toHsl model.fillColor
-
         ec =
-            { hsl | alpha = 0.3 }
+            Color.toHsl model.fillColor
     in
         Color.linear start end <|
-          [ ( 0, Color.hsla ec.hue ec.saturation ec.lightness 0.1 )
-          , ( 1, Color.hsla ec.hue ec.saturation ec.lightness ec.alpha )
-          ]
-
-
-segmentLineStyle : Model -> LineStyle
-segmentLineStyle model =
-    { defaultLine
-        | color =
-            model.fillColor
-        , width =
-            model.radius
-                / if model.selected then
-                    55
-                  else
-                    60
-        , join = Collage.Smooth
-        , cap = Collage.Padded
-    }
+            [ ( 0, Color.hsla ec.hue ec.saturation ec.lightness 0.1 )
+            , ( 1, Color.hsla ec.hue ec.saturation ec.lightness 0.3 )
+            ]
 
 
 view : Model -> Form
@@ -135,17 +116,8 @@ view model =
             group <|
                 [ gradient (grad model) shape
                 , outlined (segmentLineStyle model) shape
+                , segmentLabel model
                 ]
-                    ++
-                        [ Text.fromString model.label
-                            |> Text.height (model.radius * 0.19)
-                            |> Text.bold
-                            |> Text.color (if (model.selected) then Color.black else (model.fillColor))
-                            |> Element.centered |> Collage.toForm
-                            --|> Collage.text
-                            |> move (toTuple <| center model)
-                            --|> Collage.scale (model.radius * 0.015)
-                        ]
     in
         if model.selected then
             frm
@@ -168,6 +140,47 @@ segmentShape model =
                 |> List.reverse
     in
         polygon <| List.map toTuple (outPositions ++ inPositions)
+
+
+segmentLineStyle : Model -> LineStyle
+segmentLineStyle model =
+    { defaultLine
+        | color = model.fillColor
+        , width = segmentLineWidth model
+        , join = Collage.Smooth
+        , cap = Collage.Padded
+    }
+
+segmentLineWidth: Model -> Float
+segmentLineWidth model =
+  let fact = if model.selected then
+      0.016
+    else
+      0.018
+  in model.radius * fact
+
+segmentLabel : Model -> Form
+segmentLabel model =
+    Text.fromString model.label
+        |> Text.height (textHeight model)
+        |> Text.bold
+        |> Text.color (textColor model)
+        |> Element.centered
+        |> Collage.toForm
+        |> move (toTuple <| center model)
+
+
+textHeight : Model -> Float
+textHeight model =
+    model.radius * 0.19
+
+
+textColor : Model -> Color
+textColor model =
+    if (model.selected) then
+        Color.black
+    else
+        model.fillColor
 
 
 center : Model -> Vec2

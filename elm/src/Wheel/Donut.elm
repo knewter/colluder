@@ -2,10 +2,8 @@ module Wheel.Donut exposing (..)
 
 import Math.Vector2 as Vec2 exposing (Vec2, vec2, getX, getY)
 import Collage as Co exposing (Form, defaultLine, LineStyle)
-import Color exposing (Color)
 import Dict exposing (Dict)
 import Wheel.Segment as Segment
-
 
 type alias Model =
     { segments : Dict Int Segment.Model
@@ -107,11 +105,3 @@ view model =
         |> snd
         |> List.map Segment.view
         |> Co.group
-
-
-testLineStyle : LineStyle
-testLineStyle =
-    { defaultLine
-        | color = Color.red
-        , width = 3
-    }
