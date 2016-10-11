@@ -18,6 +18,7 @@ import Material.Textfield as Textfield
 import Material.Dialog as Dialog
 import Material.Options as Options
 
+import Wheel.View as Wheel
 
 view : Model -> Html Msg
 view model =
@@ -60,6 +61,7 @@ viewBody model =
             , viewSongEditor model
             , viewDialog model
             , viewConnection model
+            , Wheel.viewWheel model
             ]
 
 
