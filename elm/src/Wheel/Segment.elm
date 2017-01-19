@@ -132,7 +132,14 @@ segmentShape model =
             5
 
         outPositions =
-            List.map (\i -> getVector model.rotation model.degrees (i / count) model.radius) [0..count]
+            List.map
+                (\i ->
+                    getVector model.rotation
+                        model.degrees
+                        ((toFloat i) / count)
+                        model.radius
+                )
+                (List.range 0 count)
 
         inPositions =
             outPositions
@@ -151,13 +158,18 @@ segmentLineStyle model =
         , cap = Collage.Padded
     }
 
-segmentLineWidth: Model -> Float
+
+segmentLineWidth : Model -> Float
 segmentLineWidth model =
-  let fact = if model.selected then
-      0.016
-    else
-      0.018
-  in model.radius * fact
+    let
+        fact =
+            if model.selected then
+                0.016
+            else
+                0.018
+    in
+        model.radius * fact
+
 
 segmentLabel : Model -> Form
 segmentLabel model =

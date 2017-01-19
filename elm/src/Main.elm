@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Html.App as Html
+import Html
 import SoundFont.Ports exposing (..)
 import SoundFont.Msg exposing (..)
 import SoundFont.Subscriptions exposing (..)
@@ -12,7 +12,7 @@ import View exposing (view)
 import Material
 
 
-main : Program ColluderFlags
+main : Program ColluderFlags Model Msg
 main =
     Html.programWithFlags
         { init = init

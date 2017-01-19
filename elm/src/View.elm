@@ -4,21 +4,37 @@ import SoundFont.Msg exposing (..)
 import Model exposing (Model, Track)
 import Styles
 import Dict exposing (Dict)
-import Html exposing (Html, Attribute, text, div, input, button, table, tr, td, select, option, node, h1, p)
+import Html
+    exposing
+        ( Html
+        , Attribute
+        , text
+        , div
+        , input
+        , button
+        , table
+        , tr
+        , td
+        , select
+        , option
+        , node
+        , h1
+        , p
+        , strong
+        )
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onClick, onCheck, onInput, targetValue)
 import MidiTable
-import String
 import Array exposing (Array)
 import Material.Scheme
 import Material.Layout as Layout
 import Material.Color as Color
 import Material.Button as Button
-import Material.Textfield as Textfield
+import Material.Slider as Slider
 import Material.Dialog as Dialog
 import Material.Options as Options
-
 import Wheel.View as Wheel
+
 
 view : Model -> Html Msg
 view model =
@@ -52,10 +68,10 @@ viewBody : Model -> Html Msg
 viewBody model =
     let
         compiled =
-            Styles.compile Styles.css
+            Styles.compile [ Styles.css ]
     in
         div [ style [ ( "padding", "6rem" ) ] ]
-            [ node "style" [ type' "text/css" ] [ text compiled.css ]
+            [ node "style" [ type_ "text/css" ] [ text compiled.css ]
             , viewMetadata model
             , viewTopControls model
             , viewSongEditor model
@@ -81,7 +97,7 @@ noteButton model noteNum note =
         [ 7, noteNum ]
         model.mdl
         [ Options.css "width" "2rem"
-        , Button.onClick (ChooseNote note)
+        , Options.onClick (ChooseNote note)
         ]
         [ text note ]
 
@@ -93,7 +109,7 @@ octaveButton model octaveNum octave =
         model.mdl
         [ Options.css "width" "2rem"
         , Dialog.closeOn "click"
-        , Button.onClick (ChooseOctave octave)
+        , Options.onClick (ChooseOctave octave)
         ]
         [ text <| toString octave ]
 
@@ -186,15 +202,16 @@ viewTopControls model =
             [ Button.render Mdl
                 [ 0 ]
                 model.mdl
-                [ Button.onClick TogglePaused ]
+                [ Options.onClick TogglePaused ]
                 [ text pauseText ]
-            , Textfield.render Mdl
-                [ 1 ]
-                model.mdl
-                [ Textfield.onInput (SetBPM << Result.withDefault 128 << String.toInt)
-                , Textfield.floatingLabel
-                , Textfield.label "BPM"
-                , Textfield.value (toString model.bpm)
+            , div []
+                [ strong [] [ text <| "BPM: " ++ (toString model.bpm) ]
+                , Slider.view
+                    [ Slider.onChange (round >> SetBPM)
+                    , Slider.value <| toFloat model.bpm
+                    , Slider.min 0
+                    , Slider.max 400
+                    ]
                 ]
             ]
 
@@ -222,7 +239,7 @@ viewSongEditor model =
             , Button.render Mdl
                 [ 2 ]
                 model.mdl
-                [ Button.onClick AddTrack ]
+                [ Options.onClick AddTrack ]
                 [ text "Add Track" ]
             ]
 
@@ -239,7 +256,7 @@ viewTrackCell currentNote trackId ( slotId, on ) =
         td
             [ classList [ ( Styles.CurrentNote, isCurrentNote ), ( Styles.Checked, on ) ] ]
             [ input
-                [ type' "checkbox", checked on, onCheck (CheckNote trackId slotId) ]
+                [ type_ "checkbox", checked on, onCheck (CheckNote trackId slotId) ]
                 [ text <| toString slotId ]
             ]
 
@@ -272,7 +289,7 @@ viewTrackMetadata model trackId track =
                 [ 4 ]
                 model.mdl
                 [ Dialog.openOn "click"
-                , Button.onClick <| SetEditingTrack trackId
+                , Options.onClick <| SetEditingTrack trackId
                 ]
                 [ text <| note ++ (toString octave) ]
 
@@ -292,7 +309,11 @@ viewConnection : Model -> Html Msg
 viewConnection model =
     case model.phxSocket of
         Nothing ->
-            button [ onClick ConnectSocket ] [ text "Connect to backend" ]
+            Button.render Mdl
+                [ 9 ]
+                model.mdl
+                [ Options.onClick ConnectSocket ]
+                [ text "Connect to backend" ]
 
         _ ->
             div [] []

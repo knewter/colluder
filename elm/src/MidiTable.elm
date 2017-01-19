@@ -20,7 +20,7 @@ octaves =
 
 noteIds : Array Int
 noteIds =
-    [0..127]
+    List.range 1 127
         |> Array.fromList
 
 
@@ -71,8 +71,8 @@ getNoteAndOctaveByNoteId noteId =
 indexOf : a -> List a -> Maybe Int
 indexOf el list =
     let
-        indexOf' list' index =
-            case list' of
+        indexOf_ list_ index =
+            case list_ of
                 [] ->
                     Nothing
 
@@ -80,6 +80,6 @@ indexOf el list =
                     if x == el then
                         Just index
                     else
-                        indexOf' xs (index + 1)
+                        indexOf_ xs (index + 1)
     in
-        indexOf' list 0
+        indexOf_ list 0

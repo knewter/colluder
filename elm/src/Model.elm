@@ -54,7 +54,7 @@ track =
 
 trackSlots : Slots
 trackSlots =
-    [0..(totalNotes - 1)]
+    List.range 0 (totalNotes - 1)
         |> List.foldl (\slotId acc -> Dict.insert slotId False acc) Dict.empty
 
 

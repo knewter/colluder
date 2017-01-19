@@ -178,8 +178,8 @@ update msg model =
                 Ok song ->
                     { model | song = song } ! []
 
-        Mdl msg' ->
-            Material.update msg' model
+        Mdl mdlMsg ->
+            Material.update Mdl mdlMsg model
 
         NoOp ->
             ( model, Cmd.none )
@@ -234,12 +234,12 @@ setNote ( model, cmd ) trackId note =
                 payload =
                     (JE.object [ ( "trackId", JE.int trackId ), ( "noteId", JE.int note.id ) ])
 
-                push' =
+                push =
                     Phoenix.Push.init "note:set" collusionChannelName
                         |> Phoenix.Push.withPayload payload
 
                 ( phxSocket, phxCmd ) =
-                    Phoenix.Socket.push push' modelPhxSocket
+                    Phoenix.Socket.push push modelPhxSocket
             in
                 ( { model
                     | phxSocket = Just phxSocket
@@ -265,12 +265,12 @@ checkNote ( model, cmd ) trackId slotId on =
                 payload =
                     (JE.object [ ( "trackId", JE.int trackId ), ( "slotId", JE.int slotId ), ( "on", JE.bool on ) ])
 
-                push' =
+                push =
                     Phoenix.Push.init "note:check" collusionChannelName
                         |> Phoenix.Push.withPayload payload
 
                 ( phxSocket, phxCmd ) =
-                    Phoenix.Socket.push push' modelPhxSocket
+                    Phoenix.Socket.push push modelPhxSocket
             in
                 ( { model
                     | phxSocket = Just phxSocket
@@ -325,12 +325,12 @@ addTrack ( model, cmd ) trackId track =
                 payload =
                     (JE.object [])
 
-                push' =
+                push =
                     Phoenix.Push.init "track:add" collusionChannelName
                         |> Phoenix.Push.withPayload payload
 
                 ( phxSocket, phxCmd ) =
-                    Phoenix.Socket.push push' modelPhxSocket
+                    Phoenix.Socket.push push modelPhxSocket
             in
                 ( { model
                     | phxSocket = Just phxSocket

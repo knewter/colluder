@@ -15,14 +15,14 @@ decodeSlots =
 
 decodeTrack : Decoder Track
 decodeTrack =
-    object2 Track
-        ("note" := decodeMidiNote)
-        ("slots" := decodeSlots)
+    map2 Track
+        (field "note" decodeMidiNote)
+        (field "slots" decodeSlots)
 
 
 decodeSong : Decoder Song
 decodeSong =
-    ("tracks" := ((dict decodeTrack) |> map dictStringToDictIntMapper))
+    (field "tracks" ((dict decodeTrack) |> map dictStringToDictIntMapper))
 
 
 decodeMidiNote : Decoder MidiNote

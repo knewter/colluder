@@ -6,15 +6,18 @@ import Element exposing (toHtml)
 import Collage exposing (collage)
 import Wheel.Donut as Donut
 import Wheel.Segment as Segment
-import Math.Vector2 as Vec2 exposing (vec2, Vec2,getX, getY)
+import Math.Vector2 as Vec2 exposing (vec2, Vec2, getX, getY)
 import SoundFont.Types exposing (MidiNote)
 import SoundFont.Msg as Msg exposing (Msg(..))
 import MidiTable
 import Model exposing (Model, Track)
 import Dict exposing (Dict)
 
+
 wheelSize : Vec2
-wheelSize = vec2 500 500
+wheelSize =
+    vec2 500 500
+
 
 viewWheel : Model -> Html Msg
 viewWheel model =
@@ -27,16 +30,20 @@ viewWheel model =
 
         upSeg x seg =
             if isSelected playingNoteNames seg.label then
-                Segment.select True seg
+                let
+                    _ =
+                        Debug.log "viewWheel" True
+                in
+                    Segment.select True seg
             else
                 seg
 
         wheel =
             { sizedMdl | segments = Dict.map upSeg sizedMdl.segments }
-
     in
         toHtml <|
-            collage (round <| getX wheelSize) (round <| getY wheelSize)
+            collage (round <| getX wheelSize)
+                (round <| getY wheelSize)
                 [ Donut.view wheel
                 ]
 
@@ -53,21 +60,31 @@ toNote model track =
             else
                 Nothing
 
+
 toDonut : Model -> Donut.Model
 toDonut model =
-    fst <| Donut.init <| Array.toList <| MidiTable.notes
+    MidiTable.notes
+        |> Array.toList
+        |> Donut.init
+        |> Tuple.first
 
 
 getNoteText : MidiNote -> String
 getNoteText midi =
-    case MidiTable.getNoteAndOctaveByNoteId midi.id of
-        Nothing ->
-            ""
+    let
+        _ =
+            Debug.log "getNoteText" midi
 
-        Just ( note, octave ) ->
-            Debug.log "selected:" note
+        _ =
+            Debug.log "getNoteAndOctaveByNoteId" <|
+                MidiTable.getNoteAndOctaveByNoteId midi.id
+    in
+        case MidiTable.getNoteAndOctaveByNoteId midi.id of
+            Nothing ->
+                ""
 
-
+            Just ( note, octave ) ->
+                Debug.log "selected:" note
 
 
 isSelected : List String -> String -> Bool

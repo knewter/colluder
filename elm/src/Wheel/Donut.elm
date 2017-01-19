@@ -5,6 +5,7 @@ import Collage as Co exposing (Form, defaultLine, LineStyle)
 import Dict exposing (Dict)
 import Wheel.Segment as Segment
 
+
 type alias Model =
     { segments : Dict Int Segment.Model
     , radius : Float
@@ -102,6 +103,6 @@ view : Model -> Form
 view model =
     Dict.toList model.segments
         |> List.unzip
-        |> snd
+        |> Tuple.second
         |> List.map Segment.view
         |> Co.group
