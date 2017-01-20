@@ -20,7 +20,7 @@ octaves =
 
 noteIds : Array Int
 noteIds =
-    List.range 1 127
+    List.range 0 127
         |> Array.fromList
 
 

@@ -228,9 +228,6 @@ setNote ( model, cmd ) trackId note =
 
         Just modelPhxSocket ->
             let
-                _ =
-                    Debug.log "inside setNote just" 1
-
                 payload =
                     (JE.object [ ( "trackId", JE.int trackId ), ( "noteId", JE.int note.id ) ])
 
@@ -259,9 +256,6 @@ checkNote ( model, cmd ) trackId slotId on =
 
         Just modelPhxSocket ->
             let
-                _ =
-                    Debug.log "inside checknote just" 1
-
                 payload =
                     (JE.object [ ( "trackId", JE.int trackId ), ( "slotId", JE.int slotId ), ( "on", JE.bool on ) ])
 
@@ -345,10 +339,6 @@ addTrack ( model, cmd ) trackId track =
 initPhxSocket : Model -> Phoenix.Socket.Socket Msg
 initPhxSocket model =
     Phoenix.Socket.init model.socketServer
-
-
-
---|> Phoenix.Socket.withDebug
 
 
 collusionChannelName : String

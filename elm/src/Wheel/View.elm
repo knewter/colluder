@@ -30,11 +30,7 @@ viewWheel model =
 
         upSeg x seg =
             if isSelected playingNoteNames seg.label then
-                let
-                    _ =
-                        Debug.log "viewWheel" True
-                in
-                    Segment.select True seg
+                Segment.select True seg
             else
                 seg
 
@@ -71,20 +67,12 @@ toDonut model =
 
 getNoteText : MidiNote -> String
 getNoteText midi =
-    let
-        _ =
-            Debug.log "getNoteText" midi
+    case MidiTable.getNoteAndOctaveByNoteId midi.id of
+        Nothing ->
+            ""
 
-        _ =
-            Debug.log "getNoteAndOctaveByNoteId" <|
-                MidiTable.getNoteAndOctaveByNoteId midi.id
-    in
-        case MidiTable.getNoteAndOctaveByNoteId midi.id of
-            Nothing ->
-                ""
-
-            Just ( note, octave ) ->
-                Debug.log "selected:" note
+        Just ( note, octave ) ->
+            note
 
 
 isSelected : List String -> String -> Bool

@@ -40,29 +40,6 @@ initCmds model =
         ]
 
 
-
--- case JD.decodeValue conspireSongDecoder raw of
---     Ok song ->
---         let
---             _ =
---                 Debug.log "raw" raw
---         in
---             { model | song = song } ! []
---
---     Err error ->
---         let
---             _ =
---                 Debug.log "Error" error
---         in
---             model ! []
--- conspireSongDecoder : JD.Decoder Song
--- conspireSongDecoder =
---     JD.succeed
---         Dict.empty
---         |> Dict.insert 0 track
---         |> Dict.insert 1 track
-
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
     let
